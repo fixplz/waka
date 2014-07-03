@@ -15,9 +15,10 @@ start =
   sp
   init:embed?
   rules:rule+
+  { rules }
 
 rule =
-  name:name
+  name:name sp
   eq
   def:expr
   {{
@@ -38,14 +39,22 @@ expr =
   }
 
 exprFormat =
-  body:exprSeq
-  '{' sp
-  ( val:name sp '}' sp 
-  / ns:(n:name sp col v:js_expr ','? sp)+ )
+  body:exprSeq f:format?
   {
-    val != null ? { format: { val: val, of: body } }
-    : ns != null ? { format: { obj: ns, of: body } }
-    : body
+    f == null ? body
+    : f.val ? { format: { val: f.val, of: body }}
+    : { format: { obj: f.obj, of: body }}
+  }
+
+format = 
+  '{' sp
+  ( ns:(n:name sp col v:js_expr comma? {{name:n, val:v}})+ '}' sp
+  / val:( n:js_expr sp '}' sp {n})
+    )
+  {
+    val != null ? { val: val }
+    : ns != null ? { obj: ns }
+    : null
   }
 
 js_expr = [[^},]+]
@@ -61,7 +70,7 @@ exprSeq =
 exprAtom =
   not_rule
   bind:(b:name col {b})?
-  expr:(ref/str/re / expr_parens) sp
+  expr:(ref/str / expr_parens) sp
   op:('?'/'*'/'+')? sp
   {
     atom(bind,expr,op)
@@ -84,6 +93,7 @@ not_rule = !(name [ *=])
 name = [[a-zA-Z_][a-zA-Z0-9_]*]
 sp = ([[ \r\n]+] / '//' [[^\n]*\n])*
 
-slash = '/' _
-eq = '=' _
-col = ':' _
+slash = '/' sp
+eq = '=' sp
+col = ':' sp
+comma = ',' sp
