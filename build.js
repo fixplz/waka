@@ -18,4 +18,13 @@ write('reader.js', reader)
 
 var reader_func = eval(reader)
 
+console.log()
+console.log("== Running")
+console.log()
 
+var out = reader_func(read('test.peg')) 
+var res = require('util').inspect(out, { depth: null })
+
+write('result.txt', res)
+
+console.log(res)
