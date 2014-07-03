@@ -40,7 +40,7 @@ expr =
   }
 
 exprFormat =
-  body:exprSeq f:format?
+  body:exprSeq? f:format?
   {
     f == null ? body
     : f.val ? { format: { val: f.val, of: body }}
@@ -78,7 +78,9 @@ exprSeq =
 
 exprAtom =
   bind:(b:name col {b})?
-  expr:(ref/str / expr_parens) sp
+  expr:(
+    ref / str / range / expr_parens
+  )
   op:('?'/'*'/'+')? sp
   {
     atom(bind,expr,op)
@@ -89,8 +91,23 @@ expr_parens = '(' sp e:expr ')' sp {e}
 ref = n:name {{ref:n}}
 
 str =
-  ['] x:[(\\.|[^'])*] ['] {{ str: x }}
-/ ["] x:[(\\.|[^"])*] ["] {{ str: x }}
+  ['] x:[(\\.|[^'])*] ['] sp {{ str: x }}
+/ ["] x:[(\\.|[^"])*] ["] sp {{ str: x }}
+
+range =
+  '[' sp
+  not:'\^'? sp
+  r:(
+    from:rangechar '-' to:rangechar sp
+    {{ from: from, to: to }}
+  / chars:(x:rangecharsingle+ sp {x.join('')})+
+    {{ oneof: chars.join('') }}
+  )*
+  ']' sp
+  {{ range: r, not: not == '^' }}
+
+rangechar = [[^\[\] ]]
+rangecharsingle = [[^\[\]\\ ]] / '\\' [.]
 
 
 embed = '{' x:js '}' sp { x }
@@ -99,7 +116,8 @@ js = [[^{}]*] ( '{' js '}' [[^{}]*] )*
 word = [[a-zA-Z_][a-zA-Z0-9_]*]
 sp = ([[ \r\n]+] / '//' [[^\n]*\n])*
 
-name = word sp
+name = n:word sp {n}
+
 slash = '/' sp
 eq = '=' sp
 col = ':' sp
