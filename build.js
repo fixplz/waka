@@ -22,7 +22,7 @@ console.log()
 console.log("== Running")
 console.log()
 
-var out = reader_func(read('test.peg')) 
+var out = reader_func(read('reader2.peg')) 
 var res = require('util').inspect(out, { depth: null })
 
 write('result.txt', res)

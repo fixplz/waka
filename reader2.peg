@@ -1,0 +1,97 @@
+
+Start =
+  sp
+  init:embed?
+  rules:Rule+
+  { rules }
+;
+
+Rule =
+  name:name
+  eq
+  def:Expr
+  semi
+  { name: name, def: def }
+;
+
+Expr =
+  left:ExprAction
+  (
+    tail:(
+      slash 
+      e:ExprAction {e}
+      )+
+    { [left].concat(tail) }
+  /
+    { left }
+  )
+;
+
+ExprAction =
+  body:ExprSeq*
+  (
+    format:exprFormat
+    { format: format, of: body }
+  /
+    { body}
+  )
+;
+
+ExprFormat =
+  curlyl
+  f:jsEmbed
+  curlyr
+  { f }
+;
+
+ExprSeq =
+  atoms:ExprAtom*
+  { asSeq(atoms) }
+;
+
+ExprAtom =
+  bind:(n:name col {n})?
+  expr:(
+    Ref / Range / Literal
+  / ExprParens
+  )
+  op:exprOp
+  { atom() }
+;
+
+ExprParens =
+  parenl
+  e:expr
+  parenr
+  { e }
+;
+
+
+Ref = n:name { ref: n } ;
+Range = '<>' { range: '<>' } ;
+Literal = s:str { str: s } ;
+
+exprOp = op:[?*+] sp { op } ;
+
+
+name = n:word sp { n } ;
+
+word = [a-z A-Z _][a-z A-Z 0-9 _]* ;
+
+eq = '=' sp ;
+slash = '/' sp ;
+semi = ';' sp ;
+col = ':' sp ;
+comma = ',' ;
+
+
+sp = spaces* ;
+
+lsp =
+  (
+    spaces+
+  / '//' [^ \n]* '\n'
+  )*
+;
+
+spaces = (' ' / '\r' / '\n') ;
