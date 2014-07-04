@@ -27,19 +27,24 @@ var out = reader_func(read('reader2.peg'))
 var ins = util.inspect(out, { depth: null })
 write('result.txt', ins)
 
+console.log("== Running new parser")
+console.log()
+
 var vm = require('vm')
 
 vm.runInThisContext(read('Minipeg2.js'), 'Minipeg2.js')
 
-var reader_gen2 = buildParser({ rules: out, main: 'Start' })
+var reader_gen2 = buildParser(out, { debug: true })
 write('reader_gen2.js', reader_gen2.toString())
 
 var reader_func2 = reader_gen2()
 
 reader_func2.setDoc(read('test.peg'))
 var out2 = reader_func2.parse()
-var ins2 = util.inspect(out2, { depth: null })
+console.log('Success:', out2.success, 'Done:', out2.done)
+var ins2 = util.inspect(out2.result, { depth: null })
 write('result2.txt', ins2)
 
 
+console.log()
 console.log('== Done!')

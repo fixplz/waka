@@ -1,0 +1,9 @@
+
+start = foo bar ;
+
+foo = "a" / "b" ;
+
+bar =
+  x:"lala"
+  { res: x } ;
+
