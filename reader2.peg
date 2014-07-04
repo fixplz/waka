@@ -1,3 +1,9 @@
+{
+  function asSeq(atoms) {
+    return { seq: atoms }
+  }
+}
+
 
 Start =
   sp
@@ -7,12 +13,14 @@ Start =
 ;
 
 Rule =
-  name:name
+  name:RuleHead
   eq
   def:Expr
   semi
   { name: name, def: def }
 ;
+
+RuleHead = n:word sp { n } ;
 
 Expr =
   left:ExprAction
@@ -28,19 +36,19 @@ Expr =
 ;
 
 ExprAction =
-  body:ExprSeq*
+  body:ExprSeq
   (
-    format:exprFormat
+    format:ExprFormat
     { format: format, of: body }
   /
-    { body}
+    { body }
   )
 ;
 
 ExprFormat =
-  curlyl
-  f:jsEmbed
-  curlyr
+  '{' sp
+  f:JSEmbed
+  '}' sp
   { f }
 ;
 
@@ -50,33 +58,34 @@ ExprSeq =
 ;
 
 ExprAtom =
-  bind:(n:name col {n})?
+  bind:(n:word col {n})?
   expr:(
     Ref / Range / Literal
   / ExprParens
   )
-  op:exprOp
-  { atom() }
+  op:[?*+]? sp
+  { 'atom' } // TODO
 ;
 
-ExprParens =
-  parenl
-  e:expr
-  parenr
-  { e }
-;
-
-
-Ref = n:name { ref: n } ;
+Ref = n:word { ref: n } ;
 Range = '<>' { range: '<>' } ; // TODO
 Literal = s:str { str: s } ;
+ExprParens = '(' sp e:expr ')' { e } ;
 
-exprOp = op:[?*+] sp { op } ;
-
-
-name = n:word sp { n } ;
 
 word = [a-z A-Z _][a-z A-Z 0-9 _]* { '..' } ; // TODO
+
+str = 
+  ["] x:[^"]* ["] { str: x }
+/ ['] x:[^']* ['] { str: x }
+;
+// str =
+//   ['] x:[(\\.|[^'])*] ['] sp {{ str: x }}
+// / ["] x:[(\\.|[^"])*] ["] sp {{ str: x }}
+
+
+JSEmbed =  [^{}]* ( '{' JSEmbed '}' [^{}]* )* ;
+
 
 eq = '=' sp ;
 slash = '/' sp ;
@@ -85,13 +94,11 @@ col = ':' sp ;
 comma = ',' ;
 
 
-sp = spaces* ;
+sp = [\r\n\ ]* ;
 
 lsp =
   (
-    spaces+
+    [\r\n\ ]+
   / '//' [^ \n]* '\n'
   )*
 ;
-
-spaces = (' ' / '\r' / '\n') ;

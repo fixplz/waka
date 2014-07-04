@@ -15,7 +15,10 @@ start =
   sp
   init:embed?
   rules:rule+
-  { rules }
+  {{
+    rules: rules,
+    init: init,
+  }}
 
 rule =
   name:name
@@ -49,22 +52,12 @@ exprFormat =
 
 format = 
   '{' sp
-  (
-    obj:(
-      n:name
-      col
-      v:js_expr
-      comma?
-      {{name:n, val:v}}
-      )+
-    '}' sp
-  / val:( n:js_expr sp '}' sp {n})
-    )
-  {
-    val != null ? { val: val }
-    : obj != null ? { obj: obj }
-    : null
-  }
+  ( &(name col)
+    obj:js
+  / val:js
+  )
+  '}' sp
+  { val != null ? { val: val } : { obj: '{' + obj + '}' } }
 
 js_expr = [[^},]+]
 
@@ -88,7 +81,7 @@ exprAtom =
 
 expr_parens = '(' sp e:expr ')' sp {e}
 
-ref = n:name {{rule:n}}
+ref = n:name {{ref:n}}
 
 str =
   ['] x:[(\\.|[^'])*] ['] sp {{ str: x }}
