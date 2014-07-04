@@ -1,5 +1,10 @@
 
-function buildParser(parser, opts) {
+exports.buildParser = function buildParser(parser, opts) {
+
+if(opts == null) 
+  opts = {
+    debug: false,
+  }
 
 // var ast = MinipegP(parser)
 var ast = parser
@@ -7,12 +12,12 @@ var ast = parser
 var slot = 0
 var out = "'use strict';\n"
 out += "var _P={\n"
-out += "doc:'',pos:0,adv:true,\n"
-out += "str:function(s){if(_P.adv=_P.doc.substr(_P.pos,s.length)==s)_P.pos+=s.length},\n"
-out += "step:function(x){if(x)_P.pos++;_P.adv=x},\n"
-out += "reset:function(i){_P.pos=i},\n"
+out += "doc:'', pos:0, adv:true,\n"
+out += "str: function(s){ if(_P.adv = _P.doc.substr(_P.pos,s.length) == s) { _P.pos+=s.length; return s } },\n"
+out += "step: function(x){ if(_P.adv = x) { _P.pos++; return _P.doc[_P.pos-1] } },\n"
+out += "reset: function(i){ _P.pos = i },\n"
 out += "};\n"
-out += "function push(ar,v){if(ar==null)ar=[];ar.push(v);return ar}\n\n"
+out += "function push(ar,v){ if(ar==null) ar=[]; ar.push(v); return ar }\n\n"
 
 out += ast.init + ';\n'
 
@@ -30,9 +35,7 @@ out += '_P.pos=0;var res=_rules[r||"Start"]();\n'
 out += 'return{done:_P.pos==_P.doc.length, success:_P.adv, result:res}\n'
 out += '}}\n'
 
-// require('fs').writeFileSync('dump.txt', out)
 return Function(out)
-// return out
 
 function putRule(name, def) {
   out += '_rules.' + name + '=function(){'
@@ -143,16 +146,7 @@ function put(el, set, push) {
     if(f.of) put(f.of, null, false)
     if(set) {
       var format
-      if(f.val) format = f.val
-      else if(f.obj) {
-        format = f.obj
-        /*format = '{'
-        for(var i = 0; i < f.obj.length; i++) {
-          if(i > 0) format += ','
-          format += f.obj[i].name + ':' + f.obj[i].val
-        }
-        format += '}'*/
-      }
+      format = f.val || f.obj
       putSet(set, push, format)
     }
     else failBuild(el)
