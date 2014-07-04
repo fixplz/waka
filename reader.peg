@@ -1,11 +1,11 @@
 {
-  function atom(bind,expr,op){
+  function atom(set,expr,op){
     if(op){
       var _tmp = {};
-      _tmp[op=='?'?'opt':op=='+'?'many1':'many'] = expr;
+      _tmp[op=='?'?'opt':op=='+'?'many':'any'] = expr;
     }
     else {var _tmp = expr}
-    if(bind)_tmp.bind=bind;
+    if(set)_tmp.set=set;
     return _tmp
   }
 }
@@ -88,7 +88,7 @@ exprAtom =
 
 expr_parens = '(' sp e:expr ')' sp {e}
 
-ref = n:name {{ref:n}}
+ref = n:name {{rule:n}}
 
 str =
   ['] x:[(\\.|[^'])*] ['] sp {{ str: x }}
