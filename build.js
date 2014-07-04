@@ -1,4 +1,5 @@
 var fs = require('fs')
+var util = require('util')
 
 function read(f) {
   return fs.readFileSync(f, 'utf8')
@@ -23,8 +24,22 @@ console.log("== Running")
 console.log()
 
 var out = reader_func(read('reader2.peg')) 
-var res = require('util').inspect(out, { depth: null })
+var ins = util.inspect(out, { depth: null })
+write('result.txt', ins)
 
-write('result.txt', res)
+var vm = require('vm')
 
-console.log(res)
+vm.runInThisContext(read('Minipeg2.js'), 'Minipeg2.js')
+
+var reader_gen2 = buildParser({ rules: out, main: 'Start' })
+write('reader_gen2.js', reader_gen2.toString())
+
+var reader_func2 = reader_gen2()
+
+reader_func2.setDoc(read('test.peg'))
+var out2 = reader_func2.parse()
+var ins2 = util.inspect(out2, { depth: null })
+write('result2.txt', ins2)
+
+
+console.log('== Done!')

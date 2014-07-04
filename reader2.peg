@@ -1,7 +1,7 @@
 
 Start =
   sp
-  init:embed?
+  // init:embed?
   rules:Rule+
   { rules }
 ;
@@ -68,7 +68,7 @@ ExprParens =
 
 
 Ref = n:name { ref: n } ;
-Range = '<>' { range: '<>' } ;
+Range = '<>' { range: '<>' } ; // TODO
 Literal = s:str { str: s } ;
 
 exprOp = op:[?*+] sp { op } ;
@@ -76,7 +76,7 @@ exprOp = op:[?*+] sp { op } ;
 
 name = n:word sp { n } ;
 
-word = [a-z A-Z _][a-z A-Z 0-9 _]* ;
+word = [a-z A-Z _][a-z A-Z 0-9 _]* { '..' } ; // TODO
 
 eq = '=' sp ;
 slash = '/' sp ;
