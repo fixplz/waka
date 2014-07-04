@@ -1,6 +1,5 @@
 var fs = require('fs')
 var util = require('util')
-var vm = require('vm')
 
 function read(f) {
   return fs.readFileSync(f, 'utf8')
@@ -47,9 +46,9 @@ function runOldReader(reader) {
 }
 
 function generateNewReaderNewGenerator(ast) {
-  vm.runInThisContext(read('Minipeg2.js'), 'Minipeg2.js')
+  var P = require('./Minipeg2.js')
 
-  var reader2Fn = buildParser(ast, { debug: true })
+  var reader2Fn = P.buildParser(ast, { debug: true })
   write('./temp/reader2-gen2.js', reader2Fn.toString())
 
   return reader2Fn()
