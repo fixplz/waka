@@ -1,5 +1,6 @@
 var fs = require('fs')
 var util = require('util')
+var vm = require('vm')
 
 function read(f) {
   return fs.readFileSync(f, 'utf8')
@@ -13,38 +14,27 @@ function write(f, contents) {
 
 var parser = require('./minipeg-old.js')
 
-
 var reader = parser(read('reader.peg'))
-write('reader.js', reader)
-
+write('./temp/reader.js', reader)
 var reader_func = eval(reader)
 
-console.log()
-console.log("== Running")
-console.log()
+console.log("\n== Running\n")
 
-var out = reader_func(read('reader2.peg')) 
-var ins = util.inspect(out, { depth: null })
-write('result.txt', ins)
+var reader2_ast = reader_func(read('reader2.peg')) 
+write('./temp/reader2-gen1-ast.txt', util.inspect(reader2_ast, { depth: null }))
 
-console.log("== Running new parser")
-console.log()
-
-var vm = require('vm')
+console.log("== Running new parser\n")
 
 vm.runInThisContext(read('Minipeg2.js'), 'Minipeg2.js')
 
-var reader_gen2 = buildParser(out, { debug: true })
-write('reader_gen2.js', reader_gen2.toString())
+var reader2_gen2 = buildParser(reader2_ast, { debug: true })
+write('./temp/reader2-gen2.js', reader2_gen2.toString())
+var reader2_func = reader2_gen2()
 
-var reader_func2 = reader_gen2()
+reader2_func.setDoc(read('test.peg'))
+var reader2_out = reader2_func.parse()
 
-reader_func2.setDoc(read('test.peg'))
-var out2 = reader_func2.parse()
-console.log('Success:', out2.success, 'Done:', out2.done)
-var ins2 = util.inspect(out2.result, { depth: null })
-write('result2.txt', ins2)
+console.log('Success:', reader2_out.success, 'Done:', reader2_out.done)
+write('./temp/reader2-gen2-ast.txt', util.inspect(reader2_out.result, { depth: null }))
 
-
-console.log()
-console.log('== Done!')
+console.log('\n== Done!\n')
