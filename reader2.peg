@@ -22,7 +22,7 @@ Start =
   sp
   init:JSEmbed?
   rules:Rule+
-  { rules }
+  { rules: rules, init: init, }
 ;
 
 Rule =
@@ -73,14 +73,29 @@ ExprAtom =
   { atom(bind, expr, op) }
 / 
   op:[&!]
-  expr:( Ref / Range / Literal / ExprParens )
+  expr:( Ref / Range / Literal / ExprParens ) sp
   { lookahead: expr, not: op == '!' }
 ;
 
 Ref = n:word { ref: n } ;
-Range = r:rangelit { range: r } ;
 Literal = s:str { str: s } ;
-ExprParens = '(' sp e:Expr ')' sp { e } ;
+ExprParens = '(' sp e:Expr ')' { e } ;
+
+Range =
+  '['
+  not:'^'? sp
+  rs:(
+    from:rangechar '-' to:rangechar sp
+    { from: from, to: to }
+  / 
+    chars:( c:rangechar+ sp { cat(c) } )+
+    { oneof: cat(chars) }
+  )*
+  ']'
+  { range: rs, not: not == '^' }
+;
+
+rangechar = '\\' any / [^\[\] ] ;
 
 JSEmbed =
   '{' sp
@@ -102,22 +117,6 @@ str =
   ["] x:('\\' any / [^"])* ["] { x }
 / ['] x:('\\' any / [^'])* ['] { x }
 ;
-
-rangelit =
-  '['
-  not:'^'? sp
-  rs:(
-    from:rangechar '-' to:rangechar sp
-    { from: from, to: to }
-  / 
-    chars:( c:rangechar+ sp { cat(c) } )+
-    { oneof: cat(chars) }
-  )*
-  ']' sp
-  { range: rs, not: not == '^' }
-;
-
-rangechar = '\\' any / [^\[\] ] ;
 
 embed =  [^{}]* ( '{' embed '}' [^{}]* )* ;
 
