@@ -1,9 +1,13 @@
 
 start = foo bar ;
 
-foo = "a" / "b" ;
+foo = "a" / "b" / 'a\nb\'c' ;
 
 bar =
   x:"lala"
   { res: x } ;
 
+ranges =
+  [a-z A-Z $_!]
+  [^0-9]
+;

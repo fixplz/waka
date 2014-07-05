@@ -37,23 +37,24 @@ return out
 
 function putRule(name, def) {
   ruleState = {
+    name: name,
     vars: 0,
   }
 
   out += '_rules.' + name + ' = function() {\n'
 
-  putProcIntro(name)
+  putProcIntro()
 
   putNode(def, '_R')
 
-  putProcOutro(name)
+  putProcOutro()
 
   out += 'return _R;\n'
   out += '}\n'
 }
 
 function putNode(el, bind) {
-  bind = bind || el.set
+  bind = bind || el.bind
 
   var match = (
      tryRewrites()
@@ -74,24 +75,31 @@ function putNode(el, bind) {
   return
 
 function tryRewrites() {
-  if(el.any && isSimple(el.any) && bind) {
-    putNode({ seq: [{ any: el.any }], set: bind })
+  if(el.any && bind && isSimple(el.any)) {
+    putNode({ seq: [{ any: el.any }], bind: bind })
     return true
   }
-  if(el.many && isSimple(el.many) && bind) {
-    putNode({ seq: [{ many: el.many }], set: bind })
+  if(el.many && bind && isSimple(el.many)) {
+    putNode({ seq: [{ many: el.many }], bind: bind })
     return true
   }
   return false
 }
 
 function isSimple(el) {
-  return !!el.str || !!el.range
+  if(el.str || el.range || el.seq) return true
+  if(el.alt) return el.alt.some(isSimple)
+  if(el.any) return isSimple(el.any)
+  if(el.many) return isSimple(el.many)
+  if(el.opt) return isSimple(el.opt)
+  return false
 }
 
 function tryStr() {
   if(!el.str) return false
+
   putExpr(bind, '_P.match(' + stringify(el.str) + ')' )
+  
   return true
 }
 
@@ -151,7 +159,7 @@ function trySeq() {
   for(var iter_seq = 0; iter_seq < el.seq.length; iter_seq++) {
     putNode(el.seq[iter_seq])
     if(iter_seq < el.seq.length - 1)
-      out += 'if(!_P.adv)break ' + block + ';\n'
+      out += 'if(!_P.adv) break ' + block + ';\n'
   }
     
   if(bind) {
@@ -192,7 +200,7 @@ function tryAny() {
   out += 'for(;;) {\n'
 
   putNode(el.any, arrItem)
-  out += 'if(!_P.adv) break;'
+  out += 'if(!_P.adv) break;\n'
   
   if(bind) out += arr + '.push(' + arrItem + ');\n'
 
@@ -208,12 +216,12 @@ function tryMany() {
     var arr = putInitArr(bind || getName())
     var arrItem = putVar(getName())
   }
-  var once = putVar(getName())
+  var once = putExpr(getName(), 'false')
 
   out += 'for(;;) {\n'
 
   putNode(el.many, arrItem)
-  out += 'if(!_P.adv) break;'
+  out += 'if(!_P.adv) break;\n'
 
   if(bind) out += arr + '.push(' + arrItem + ');\n'
   out += once + '=true;\n'
@@ -247,14 +255,14 @@ function tryFormat() {
 }
 
 
-function putProcIntro(name) {
+function putProcIntro() {
   if(opts.debug)
-    out += 'console.log(">' + name + '", _P.pos);\n'
+    out += 'console.log(">' + ruleState.name + '", _P.pos);\n'
 }
 
 function putProcOutro(name) {
   if(opts.debug)
-    out += 'console.log("<' + name + '", _P.adv ? _P.pos : "X");\n'
+    out += 'console.log("<' + ruleState.name + '", _P.adv ? _P.pos : "X");\n'
 }
 
 function putBindStart(bind) {

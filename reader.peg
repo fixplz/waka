@@ -1,11 +1,11 @@
 {
-  function atom(set,expr,op){
+  function atom(bind,expr,op){
     if(op){
       var _tmp = {};
       _tmp[op=='?'?'opt':op=='+'?'many':'any'] = expr;
     }
     else {var _tmp = expr}
-    if(set)_tmp.set=set;
+    if(bind)_tmp.bind=bind;
     return _tmp
   }
 }
