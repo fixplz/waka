@@ -13,6 +13,8 @@ out += 'cur: function(){ return _P.doc[_P.pos] },'
 out += "match: function(str) { if(_P.adv = _P.doc.substr(_P.pos, str.length) == str) { _P.pos += str.length; return str } },\n"
 out += "step: function(flag) { if(_P.adv = flag) { _P.pos++; return _P.doc[_P.pos-1] } },\n"
 out += "reset: function(pos) { _P.pos = pos },\n"
+out += "error: function(rule) { console.error('Unexpected syntax in ' + rule); console.error(_P.getline(_P.pos)); throw new Error('Cancel parser') },\n"
+out += "getline: function(pos) { var l = _P.doc.lastIndexOf('\\n', pos), r = _P.doc.indexOf('\\n', pos); if(l == -1) l = 0; else l++; if(r == -1) r = pos.length; return _P.doc.substring(l, r) + '\\n' + '                                                                                                                        '.substr(0, pos - l) + '^^^' },\n"
 out += "};\n"
 
 out += ast.init + ';\n'
@@ -43,9 +45,14 @@ function putRule(name, def) {
 
   out += '_rules.' + name + ' = function() {\n'
 
+  putExpr('_A', 'false');
+
   putProcIntro()
 
   putNode(def, '_R')
+
+  if(name == 'Start')
+    out += 'if(_P.pos < _P.doc.length) _P.error("top");\n'
 
   putProcOutro()
 
@@ -69,6 +76,7 @@ function putNode(el, bind) {
   || tryOpt()
   || tryFormat()
   || tryLookahead()
+  || tryAnchor()
   )
 
   if(!match) failBuild(el)
@@ -156,8 +164,12 @@ function trySeq() {
 
   var startPos = getName()
   putExpr(startPos, '_P.pos')
+  var anchor = null
 
   for(var iter_seq = 0; iter_seq < el.seq.length; iter_seq++) {
+    if(el.seq[iter_seq].anchor)
+      anchor = putExpr(getName(), 'true')
+
     putNode(el.seq[iter_seq])
     if(iter_seq < el.seq.length - 1)
       out += 'if(!_P.adv) break ' + block + ';\n'
@@ -169,7 +181,10 @@ function trySeq() {
 
   out += '}\n'
 
-  out += 'if(!_P.adv) _P.pos=' + startPos + ';\n'
+  if(anchor == null)
+    out += 'if(!_P.adv) _P.pos=' + startPos + ';\n'
+  else
+    out += 'if(!_P.adv && ' + anchor + ') _P.error(' + JSON.stringify(ruleState.name) + ');\n'
 
   return true
 }
@@ -263,6 +278,14 @@ function tryLookahead() {
   out += '_P.pos=' + startPos + ';\n'
   if(el.not)
     out += '_P.adv=!_P.adv;'  
+
+  return true
+}
+
+function tryAnchor() {
+  if(!el.anchor) return false
+
+  out += '_A=true;\n'
 
   return true
 }

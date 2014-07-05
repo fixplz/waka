@@ -1,47 +1,51 @@
 var fs = require('fs')
 var util = require('util')
+var args = require('yargs').argv
 
 var fp = {
-  stableBuilder: './source/build-parser.js',
-  stableAST: './source/reader-ast.json',
-  stablePEG: './source/reader.peg',
+  sourceBuilder: './source/build-parser.js',
+  sourceAST: './source/reader-ast.json',
+  sourcePEG: './source/reader.peg',
 
-  stableDump: './assemble/stable-builder.dump.js',
-  newAST: './assemble/reader-ast.json',
+  dump: './assemble/stable-builder.dump.js',
   newDump: './assemble/new-builder.dump.js',
+  newAST: './assemble/reader-ast.json',
+  newAST2: './assemble/reader-ast-2.json',
 }
 
-console.log('Building stable parser')
 
-var buildParser = require(fp.stableBuilder).buildParser
+var buildParser = require(fp.sourceBuilder).buildParser
 
-var ast_orig = JSON.parse(read(fp.stableAST))
+var orig_ast = JSON.parse(read(!args.new ? fp.sourceAST : fp.newAST))
+var source_peg = read(fp.sourcePEG)
 
-var reader_orig_src = buildParser(ast_orig)
-write(fp.stableDump, reader_orig_src)
+var reader = getReader(orig_ast, "first-pass" , fp.dump)
+var new_ast = getAST(reader, source_peg, "PEG source", fp.newAST)
+// var new_reader = getReader(new_ast, "second-pass", fp.newDump)
+// new_ast = getAST(new_reader, source_peg, "PEG source 2", fp.newAST2)
 
-var reader = Function(reader_orig_src)()
 
-console.log('Parsing new AST')
+function getReader(ast, name, dump) {
+  var src = buildParser(ast, { debug: args.debug })
+  write(dump, src)
+  return require('vm').runInThisContext(
+    '(function() {' + src + '}())',
+    name
+  )
+}
 
-var result_ast_new = reader.parse(read(fp.stablePEG))
+function getAST(reader, peg, name, dump) {
+  console.log("Running reader on", name)
+  
+  var status = reader.parse(peg)
+  
+  console.log(require('util').inspect(status, { depth: 0 }))
 
-console.log(util.inspect(result_ast_new, { depth: 1 }))
+  if(status.success && status.done)
+    write(dump, JSON.stringify(status.result, null, "  "))
 
-if(! result_ast_new.success && ! result_ast_new.done)
-  process.exit(1)
-
-var ast_new = result_ast_new.result
-
-write(fp.newAST, JSON.stringify(ast_new, null, "  "))
-
-console.log('Building new parser')
-
-var reader_new_src = buildParser(ast_new)
-
-write(fp.newDump, reader_new_src)
-
-process.exit(0)
+  return status.result
+}
 
 function read(f) {
   return fs.readFileSync(f, 'utf8')

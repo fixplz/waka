@@ -28,6 +28,7 @@ Start =
 Rule =
   name:RuleHead
   eq
+  %anc
   def:Expr
   semi
   { name: name, def: def }
@@ -75,6 +76,8 @@ ExprAtom =
   op:[&!]
   expr:( Ref / Range / Literal / ExprParens ) sp
   { lookahead: expr, not: op == '!' }
+/
+  '%anc' sp { anchor: true }
 ;
 
 Ref = n:word { ref: n } ;
@@ -95,7 +98,7 @@ Range =
   { range: rs, not: not == '^' }
 ;
 
-rangechar = '\\' any / [^\[\] ] ;
+rangechar = '\\' any / [^\[\]\ ] ;
 
 JSEmbed =
   '{' sp
