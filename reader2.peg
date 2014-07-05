@@ -1,6 +1,7 @@
 {
   function asSeq(atoms) {
-    return { seq: atoms }
+    if(atoms.length > 1) return { seq: atoms }
+    return atoms[0]
   }
   function atom(bind, expr, op) {
     var el =
@@ -8,15 +9,18 @@
       : op == '*' ? { any: expr }
       : op == '?' ? { opt: expr }
       : expr
-    if(bind) el.set = bind
+    if(bind) el.bind = bind
     return el
+  }
+  function cat(arr) {
+    return arr.join('')
   }
 }
 
 
 Start =
   sp
-  // init:embed?
+  init:JSEmbed?
   rules:Rule+
   { rules }
 ;
@@ -48,19 +52,12 @@ Expr =
 ExprAction =
   body:ExprSeq
   r:(
-    format:ExprFormat
+    format:JSEmbed
     { format: format, of: body }
   /
     { body }
   )
   { r }
-;
-
-ExprFormat =
-  '{' sp
-  f:JSEmbed
-  '}' sp
-  { f }
 ;
 
 ExprSeq =
@@ -79,31 +76,48 @@ ExprAtom =
 ;
 
 Ref = n:word { ref: n } ;
-Range = '<>' { range: '<>' } ; // TODO
+Range = r:rangelit { range: r } ;
 Literal = s:str { str: s } ;
 ExprParens = '(' sp e:expr ')' { e } ;
 
+JSEmbed =
+  '{' sp
+  e:embed
+  '}' sp
+  { e }
+;
 
 word = [a-z A-Z _][a-z A-Z 0-9 _]* ;
 
 str = 
-  ["] x:[^"]* ["] { x }
-/ ['] x:[^']* ['] { x }
+  ["] x:('\\' any / [^"])* ["] { x }
+/ ['] x:('\\' any / [^'])* ['] { x }
 ;
-// str =
-//   ['] x:[(\\.|[^'])*] ['] sp {{ str: x }}
-// / ["] x:[(\\.|[^"])*] ["] sp {{ str: x }}
 
+rangelit =
+  '['
+  not:'^'? sp
+  rs:(
+    from:rangechar '-' to:rangechar sp
+    { from: from, to: to }
+  / 
+    chars:( c:rangechar+ sp { cat(c) } )+
+    { oneof: cat(chars) }
+  )*
+  ']' sp
+  { range: rs, not: not == '^' }
+;
 
-JSEmbed =  [^{}]* ( '{' JSEmbed '}' [^{}]* )* ;
+rangechar = '\\' any / [^\[\] ] ;
 
+embed =  [^{}]* ( '{' embed '}' [^{}]* )* ;
 
 eq = '=' sp ;
 slash = '/' sp ;
 semi = ';' sp ;
 col = ':' sp ;
-comma = ',' ;
 
+any = { _P.step(true) } ;
 
 sp = [\r\n\ ]* ;
 
