@@ -52,8 +52,9 @@ Expr =
 ExprAction =
   body:ExprSeq
   r:(
+    isobj:JSIsObj
     format:JSEmbed
-    { format: format, of: body }
+    { format: isobj ? '{' + format + '}' : format, of: body }
   /
     { body }
   )
@@ -67,24 +68,32 @@ ExprSeq =
 
 ExprAtom =
   bind:(n:word col {n})?
-  expr:(
-    Ref / Range / Literal
-  / ExprParens
-  )
+  expr:( Ref / Range / Literal / ExprParens )
   op:[?*+]? sp
   { atom(bind, expr, op) }
+/ 
+  op:[&!]
+  expr:( Ref / Range / Literal / ExprParens )
+  { lookahead: expr, not: op == '!' }
 ;
 
 Ref = n:word { ref: n } ;
 Range = r:rangelit { range: r } ;
 Literal = s:str { str: s } ;
-ExprParens = '(' sp e:expr ')' { e } ;
+ExprParens = '(' sp e:Expr ')' sp { e } ;
 
 JSEmbed =
   '{' sp
   e:embed
   '}' sp
   { e }
+;
+
+JSIsObj =
+  &( '{' sp word sp col )
+  { true }
+/
+  { false }
 ;
 
 word = [a-z A-Z _][a-z A-Z 0-9 _]* ;

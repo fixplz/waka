@@ -68,6 +68,7 @@ function putNode(el, bind) {
   || tryMany()
   || tryOpt()
   || tryFormat()
+  || tryLookahead()
   )
 
   if(!match) failBuild(el)
@@ -244,10 +245,24 @@ function tryOpt() {
 function tryFormat() {
   if(!el.format) return false
 
-  if(el.format.of)
-    putNode(el.format.of)
+  if(el.of)
+    putNode(el.of)
   out += 'if(_P.adv)'
-  putExpr(bind, '(' + (el.format.val || el.format.obj) + ')')
+  putExpr(bind, '(' + el.format + ')')
+
+  return true
+}
+
+function tryLookahead() {
+  if(!el.lookahead) return false
+
+  var startPos = putExpr(getName(), '_P.pos')
+
+  putNode(el.lookahead, bind)
+
+  out += '_P.pos=' + startPos + ';\n'
+  if(el.not)
+    out += '_P.adv=!_P.adv;'  
 
   return true
 }
