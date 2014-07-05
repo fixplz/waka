@@ -2,7 +2,7 @@ exports.buildParser = buildParser
 
 function buildParser(ast, opts) {
 
-if(opts == null) opts = null
+if(opts == null) opts = {}
 
 var ruleState
 
