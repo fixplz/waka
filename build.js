@@ -1,64 +1,52 @@
 var fs = require('fs')
 var util = require('util')
 
+var fp = {
+  stableBuilder: './source/build-parser.js',
+  stableAST: './source/reader-ast.json',
+  stablePEG: './source/reader.peg',
+
+  stableDump: './assemble/stable-builder.dump.js',
+  newAST: './assemble/reader-ast.json',
+  newDump: './assemble/new-builder.dump.js',
+}
+
+console.log('Building stable parser')
+
+var buildParser = require(fp.stableBuilder).buildParser
+
+var ast_orig = JSON.parse(read(fp.stableAST))
+
+var reader_orig_src = buildParser(ast_orig)
+write(fp.stableDump, reader_orig_src)
+
+var reader = Function(reader_orig_src)()
+
+console.log('Parsing new AST')
+
+var result_ast_new = reader.parse(read(fp.stablePEG))
+
+console.log(util.inspect(result_ast_new, { depth: 1 }))
+
+if(! result_ast_new.success && ! result_ast_new.done)
+  process.exit(1)
+
+var ast_new = result_ast_new.result
+
+write(fp.newAST, JSON.stringify(ast_new, null, "  "))
+
+console.log('Building new parser')
+
+var reader_new_src = buildParser(ast_new)
+
+write(fp.newDump, reader_new_src)
+
+process.exit(0)
+
 function read(f) {
   return fs.readFileSync(f, 'utf8')
 }
 
 function write(f, contents) {
   fs.writeFileSync(f, contents, 'utf8')
-}
-
-function writeInspect(f, ast) {
-  write(f, util.inspect(ast, { depth: null }))
-}
-
-
-
-var reader1 = generateNewReaderOldSyntax()
-
-console.log("\n== Running old reader\n")
-
-var reader2_ast = runOldReader(reader1)
-
-console.log("== Running new generator\n")
-
-var reader2 = generateNewReaderNewGenerator(reader2_ast)
-
-runNewReader(reader2)
-
-console.log('\n== Done!\n')
-
-
-function generateNewReaderOldSyntax() {
-  var p = require('./minipeg-old.js')
-
-  var readerSrc = p(read('reader.peg'))
-  write('./temp/reader.js', readerSrc)
-
-  return eval(readerSrc)
-}
-
-function runOldReader(reader) {
-  var ast = reader(read('reader2.peg'))
-  writeInspect('./temp/reader2-gen1-ast.txt', ast)
-  return ast
-}
-
-function generateNewReaderNewGenerator(ast) {
-  var P = require('./Peg-new.js')
-
-  var reader2Src = P.buildParser(ast, { debug: true })
-  write('./temp/reader2-gen2.js', reader2Src)
-
-  return Function(reader2Src)()
-}
-
-function runNewReader(reader) {
-  var result = reader.parse(read('reader2.peg'))
-
-  console.log('Success:', result.success, 'Done:', result.done)
-  write('./temp/reader2-gen2-ast.txt', util.inspect(result.result, { depth: null }))
-
-  return result
 }
