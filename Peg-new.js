@@ -55,139 +55,196 @@ function putRule(name, def) {
 function putNode(el, bind) {
   bind = bind || el.set
 
-  if(el.any && (el.any.str || el.any.range) && bind) {
-      putNode({ seq: [{ any: el.any }], set: bind })
+  var match = (
+     tryRewrites()
+  || tryStr()
+  || tryRange()
+  || tryRef()
+  || tryRange()
+  || trySeq()
+  || tryAlt()
+  || tryAny()
+  || tryMany()
+  || tryOpt()
+  || tryFormat()
+  )
+
+  if(!match) failBuild(el)
+
+  return
+
+function tryRewrites() {
+  if(el.any && isSimple(el.any) && bind) {
+    putNode({ seq: [{ any: el.any }], set: bind })
+    return true
   }
-  
-  else if(el.many && (el.many.str || el.many.range) && bind) {
-      putNode({ seq: [{ many: el.many }], set: bind })
+  if(el.many && isSimple(el.many) && bind) {
+    putNode({ seq: [{ many: el.many }], set: bind })
+    return true
   }
-
-  else if(el.ref) {    
-    putExpr(bind, '_rules.' + el.ref + '()' )
-  }
-
-  else if(el.str) {
-    putExpr(bind, '_P.match(' + stringify(el.str) + ')' )
-  }
-
-  else if(el.range) {
-    var curChar = getName()
-    putExpr(curChar, '_P.cur()')
-    out += 'if(' + curChar + '==null){'
-    out += '_P.adv=false;\n'
-    putExpr(bind, 'null')
-    out += '}else{\n'
-
-    putBindStart(bind)
-
-    out += '_P.step('
-    if(el.not)
-      out += '!('
-
-    for(var iter_r = 0; iter_r < el.range.length; iter_r++) {
-      var r = el.range[iter_r]
-
-      if(r.from)
-        out += stringify(r.from) + '<=' + curChar + '&&' + curChar + '<=' + stringify(r.to)
-      else
-        out += stringify(r.oneof) + '.indexOf(' + curChar + ')!=-1'
-
-      if(iter_r < el.range.length - 1) out += '||'
-    }
-    if(el.not)
-      out += ')'
-    out += ');\n'
-
-    out += '}\n'
-  }
-
-  else if(el.seq) {
-    var block = getName()
-
-    out += block + ':{'
-
-    var startPos = getName()
-    putExpr(startPos, '_P.pos')
-
-    for(var iter_seq = 0; iter_seq < el.seq.length; iter_seq++) {
-      putNode(el.seq[iter_seq])
-      if(iter_seq < el.seq.length - 1)
-        out += 'if(!_P.adv)break ' + block + ';\n'
-    }
-      
-    if(bind) {
-      putExpr(bind, '_P.doc.substring(' + startPos + ',_P.pos)')
-    }
-
-    out += '}\n'
-
-    out += 'if(!_P.adv) _P.pos=' + startPos + ';\n'
-  }
-
-  else if(el.alt) {
-    for(var iter_alt = 0; iter_alt < el.alt.length; iter_alt++) {
-      if(iter_alt > 0)
-        out += 'if(!_P.adv){ _P.adv=true;\n'
-
-      putNode(el.alt[iter_alt], bind)
-
-      if(iter_alt > 0)
-        out += '}\n'
-    }
-  }
-
-  else if(el.any) {
-    if(bind) {
-      var arr = putInitArr(bind)
-      var arrItem = putVar(getName())
-    }
-
-    out += 'for(;;) {\n'
-
-    putNode(el.any, arrItem)
-    out += 'if(!_P.adv) break;'
-    
-    if(bind) out += arr + '.push(' + arrItem + ');\n'
-
-    out += '}; _P.adv=true;\n'
-  }
-
-  else if(el.many) {
-    if(bind) {
-      var arr = putInitArr(bind || getName())
-      var arrItem = putVar(getName())
-    }
-    var once = putVar(getName())
-
-    out += 'for(;;) {\n'
-
-    putNode(el.many, arrItem)
-    out += 'if(!_P.adv) break;'
-
-    if(bind) out += arr + '.push(' + arrItem + ');\n'
-    out += once + '=true;\n'
-
-    out += '}; if(' + once + ') _P.adv=true;\n'
-  }
-
-  else if(el.opt) {
-    putExpr(bind, 'null')
-    putNode(el.opt, bind)
-    out += '_P.adv=true;\n'
-  }
-
-  else if(el.format) {
-    if(el.format.of)
-      putNode(el.format.of)
-    out += 'if(_P.adv)'
-    putExpr(bind, '(' + (el.format.val || el.format.obj) + ')')
-  }
-
-  else failBuild(el)
-
+  return false
 }
 
+function isSimple(el) {
+  return !!el.str || !!el.range
+}
+
+function tryStr() {
+  if(!el.str) return false
+  putExpr(bind, '_P.match(' + stringify(el.str) + ')' )
+  return true
+}
+
+function tryRange() {
+  if(!el.range) return false
+
+  var curChar = getName()
+  putExpr(curChar, '_P.cur()')
+  out += 'if(' + curChar + '==null){'
+  out += '_P.adv=false;\n'
+  putExpr(bind, 'null')
+  out += '}else{\n'
+
+  putBindStart(bind)
+
+  out += '_P.step('
+  if(el.not)
+    out += '!('
+
+  for(var iter_r = 0; iter_r < el.range.length; iter_r++) {
+    var r = el.range[iter_r]
+
+    if(r.from)
+      out += stringify(r.from) + '<=' + curChar + '&&' + curChar + '<=' + stringify(r.to)
+    else
+      out += stringify(r.oneof) + '.indexOf(' + curChar + ')!=-1'
+
+    if(iter_r < el.range.length - 1) out += '||'
+  }
+  if(el.not)
+    out += ')'
+  out += ');\n'
+
+  out += '}\n'
+
+  return true
+}
+
+function tryRef() {
+  if(!el.ref) return false
+
+  putExpr(bind, '_rules.' + el.ref + '()' )
+
+  return true
+}
+
+function trySeq() {
+  if(!el.seq) return false
+
+  var block = getName()
+
+  out += block + ':{'
+
+  var startPos = getName()
+  putExpr(startPos, '_P.pos')
+
+  for(var iter_seq = 0; iter_seq < el.seq.length; iter_seq++) {
+    putNode(el.seq[iter_seq])
+    if(iter_seq < el.seq.length - 1)
+      out += 'if(!_P.adv)break ' + block + ';\n'
+  }
+    
+  if(bind) {
+    putExpr(bind, '_P.doc.substring(' + startPos + ',_P.pos)')
+  }
+
+  out += '}\n'
+
+  out += 'if(!_P.adv) _P.pos=' + startPos + ';\n'
+
+  return true
+}
+
+function tryAlt() {
+  if(!el.alt) return false
+  
+  for(var iter_alt = 0; iter_alt < el.alt.length; iter_alt++) {
+    if(iter_alt > 0)
+      out += 'if(!_P.adv){ _P.adv=true;\n'
+
+    putNode(el.alt[iter_alt], bind)
+
+    if(iter_alt > 0)
+      out += '}\n'
+  }
+  
+  return true
+}
+
+function tryAny() {
+  if(!el.any) return false
+
+  if(bind) {
+    var arr = putInitArr(bind)
+    var arrItem = putVar(getName())
+  }
+
+  out += 'for(;;) {\n'
+
+  putNode(el.any, arrItem)
+  out += 'if(!_P.adv) break;'
+  
+  if(bind) out += arr + '.push(' + arrItem + ');\n'
+
+  out += '}; _P.adv=true;\n'
+
+  return true
+}
+
+function tryMany() {
+  if(!el.many) return false
+
+  if(bind) {
+    var arr = putInitArr(bind || getName())
+    var arrItem = putVar(getName())
+  }
+  var once = putVar(getName())
+
+  out += 'for(;;) {\n'
+
+  putNode(el.many, arrItem)
+  out += 'if(!_P.adv) break;'
+
+  if(bind) out += arr + '.push(' + arrItem + ');\n'
+  out += once + '=true;\n'
+
+  out += '}; if(' + once + ') _P.adv=true;\n'
+
+  return true
+}
+
+function tryOpt() {
+  if(!el.opt) return false
+
+  putExpr(bind, 'null')
+  putNode(el.opt, bind)
+  out += '_P.adv=true;\n'
+  
+  return true
+}
+
+function tryFormat() {
+  if(!el.format) return false
+
+  if(el.format.of)
+    putNode(el.format.of)
+  out += 'if(_P.adv)'
+  putExpr(bind, '(' + (el.format.val || el.format.obj) + ')')
+
+  return true
+}
+
+}
 
 
 function putProcIntro(name) {
