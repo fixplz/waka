@@ -39,6 +39,9 @@
               "ref": "eq"
             },
             {
+              "anchor": true
+            },
+            {
               "ref": "Expr",
               "bind": "def"
             },
@@ -251,6 +254,19 @@
                 }
               ]
             }
+          },
+          {
+            "format": "{anchor: true }",
+            "of": {
+              "seq": [
+                {
+                  "str": "%anc"
+                },
+                {
+                  "ref": "sp"
+                }
+              ]
+            }
           }
         ]
       }
@@ -390,7 +406,7 @@
           {
             "range": [
               {
-                "oneof": "\\[\\] "
+                "oneof": "\\[\\]\\ "
               }
             ],
             "not": true
