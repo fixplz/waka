@@ -45,9 +45,7 @@ expr =
 exprFormat =
   body:exprSeq? f:format?
   {
-    f == null ? body
-    : f.val ? { format: { val: f.val, of: body }}
-    : { format: { obj: f.obj, of: body }}
+    f == null ? body : { format: f, of: body }
   }
 
 format = 
@@ -57,7 +55,7 @@ format =
   / val:js
   )
   '}' sp
-  { val != null ? { val: val } : { obj: '{' + obj + '}' } }
+  { val != null ? val : '{' + obj + '}' }
 
 js_expr = [[^},]+]
 
@@ -78,6 +76,12 @@ exprAtom =
   {
     atom(bind,expr,op)
   }
+/
+  op:[[&!]]
+  expr:(
+    ref / str / range / expr_parens
+  )
+  {{ lookahead: expr, not: op == '!' }}
 
 expr_parens = '(' sp e:expr ')' sp {e}
 
