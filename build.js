@@ -46,17 +46,16 @@ function runOldReader(reader) {
 }
 
 function generateNewReaderNewGenerator(ast) {
-  var P = require('./Minipeg2.js')
+  var P = require('./Peg-new.js')
 
-  var reader2Fn = P.buildParser(ast, { debug: true })
-  write('./temp/reader2-gen2.js', reader2Fn.toString())
+  var reader2Src = P.buildParser(ast, { debug: true })
+  write('./temp/reader2-gen2.js', reader2Src)
 
-  return reader2Fn()
+  return Function(reader2Src)()
 }
 
 function runNewReader(reader) {
-  reader.setDoc(read('test.peg'))
-  var result = reader.parse()
+  var result = reader.parse(read('test.peg'))
 
   console.log('Success:', result.success, 'Done:', result.done)
   write('./temp/reader2-gen2-ast.txt', util.inspect(result.result, { depth: null }))

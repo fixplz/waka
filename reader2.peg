@@ -2,6 +2,15 @@
   function asSeq(atoms) {
     return { seq: atoms }
   }
+  function atom(bind, expr, op) {
+    var el =
+      op == '+' ? { many: expr }
+      : op == '*' ? { any: expr }
+      : op == '?' ? { opt: expr }
+      : expr
+    if(bind) el.set = bind
+    return el
+  }
 }
 
 
@@ -24,25 +33,27 @@ RuleHead = n:word sp { n } ;
 
 Expr =
   left:ExprAction
-  (
+  r:(
     tail:(
       slash 
       e:ExprAction {e}
       )+
-    { [left].concat(tail) }
+    { alt: [left].concat(tail) }
   /
     { left }
   )
+  { r }
 ;
 
 ExprAction =
   body:ExprSeq
-  (
+  r:(
     format:ExprFormat
     { format: format, of: body }
   /
     { body }
   )
+  { r }
 ;
 
 ExprFormat =
@@ -64,7 +75,7 @@ ExprAtom =
   / ExprParens
   )
   op:[?*+]? sp
-  { 'atom' } // TODO
+  { atom(bind, expr, op) }
 ;
 
 Ref = n:word { ref: n } ;
@@ -73,11 +84,11 @@ Literal = s:str { str: s } ;
 ExprParens = '(' sp e:expr ')' { e } ;
 
 
-word = [a-z A-Z _][a-z A-Z 0-9 _]* { '..' } ; // TODO
+word = [a-z A-Z _][a-z A-Z 0-9 _]* ;
 
 str = 
-  ["] x:[^"]* ["] { str: x }
-/ ['] x:[^']* ['] { str: x }
+  ["] x:[^"]* ["] { x }
+/ ['] x:[^']* ['] { x }
 ;
 // str =
 //   ['] x:[(\\.|[^'])*] ['] sp {{ str: x }}
