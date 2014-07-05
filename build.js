@@ -55,7 +55,7 @@ function generateNewReaderNewGenerator(ast) {
 }
 
 function runNewReader(reader) {
-  var result = reader.parse(read('test.peg'))
+  var result = reader.parse(read('reader2.peg'))
 
   console.log('Success:', result.success, 'Done:', result.done)
   write('./temp/reader2-gen2-ast.txt', util.inspect(result.result, { depth: null }))
