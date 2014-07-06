@@ -13,8 +13,8 @@ out += 'cur: function(){ return _P.doc[_P.pos] },'
 out += "match: function(str) { if(_P.adv = _P.doc.substr(_P.pos, str.length) == str) { _P.pos += str.length; return str } },\n"
 out += "step: function(flag) { if(_P.adv = flag) { _P.pos++; return _P.doc[_P.pos-1] } },\n"
 out += "reset: function(pos) { _P.pos = pos },\n"
-out += "error: function(rule) { console.error('Unexpected syntax in ' + rule); console.error(_P.getline(_P.pos)); throw new Error('Cancel parser') },\n"
-out += "getline: function(pos) { var l = _P.doc.lastIndexOf('\\n', pos), r = _P.doc.indexOf('\\n', pos); if(l == -1) l = 0; else l++; if(r == -1) r = pos.length; return _P.doc.substring(l, r) + '\\n' + '                                                                                                                        '.substr(0, pos - l) + '^^^' },\n"
+out += "error: function(rule) { console.error('Unexpected syntax in ' + rule); _P.traceline(_P.pos); throw new Error('Cancel parser') },\n"
+out += "traceline: function(pos) { var l = _P.doc.lastIndexOf('\\n', pos), r = _P.doc.indexOf('\\n', pos); if(l == -1) l = 0; else l++; if(r == -1) r = pos.length; console.error('Line', _P.doc.substring(0, l).split('\\n').length); console.error(_P.doc.substring(l, r) + '\\n' + '                                                                                                                        '.substr(0, pos - l) + '^^^') },\n"
 out += "};\n"
 
 out += ast.init + ';\n'
