@@ -16,7 +16,7 @@ var fp = {
 
 var buildParser = require(fp.sourceBuilder).buildParser
 
-var orig_ast = JSON.parse(read(!args.new ? fp.sourceAST : fp.newAST))
+var orig_ast = JSON.parse(read(!args.usenew ? fp.sourceAST : fp.newAST))
 var source_peg = read(fp.sourcePEG)
 
 var reader = getReader(orig_ast, "first-pass" , fp.dump)
