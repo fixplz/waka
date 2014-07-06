@@ -51,11 +51,12 @@ Expr =
 ;
 
 ExprAction =
-  body:ExprSeq
+  body:ExprSeq?
   r:(
     isobj:JSIsObj
     format:JSEmbed
-    { format: isobj ? '{' + format + '}' : format, of: body }
+    { format: isobj ? '{' + format.trim() + '}' : format.trim(),
+      of: body }
   /
     { body }
   )
@@ -63,7 +64,7 @@ ExprAction =
 ;
 
 ExprSeq =
-  atoms:ExprAtom*
+  atoms:ExprAtom+
   { asSeq(atoms) }
 ;
 
@@ -101,14 +102,14 @@ Range =
 rangechar = '\\' any / [^\[\]\ ] ;
 
 JSEmbed =
-  '{' sp
+  '{'
   e:embed
   '}' sp
   { e }
 ;
 
 JSIsObj =
-  &( '{' sp word sp col )
+  &( '{' sp word ' '* col )
   { true }
 /
   { false }
@@ -130,9 +131,7 @@ col = ':' sp ;
 
 any = { _P.step(true) } ;
 
-sp = [\r\n\ ]* ;
-
-lsp =
+sp =
   (
     [\r\n\ ]+
   / '//' [^ \n]* '\n'
