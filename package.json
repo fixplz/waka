@@ -2,6 +2,9 @@
   "name": "waka",
   "version": "0.0.1",
   "devDependencies": {
-    "yargs": "~1.2.6"
+    "yargs": "~1.2.6",
+    "gulp": "~3.8.5",
+    "gulp-uglify": "~0.3.1",
+    "gulp-browserify": "~0.5.0"
   }
 }
