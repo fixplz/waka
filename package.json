@@ -1,6 +1,7 @@
 {
   "name": "waka",
   "version": "0.0.1",
+  "main": "source",
   "devDependencies": {
     "yargs": "~1.2.6",
     "gulp": "~3.8.5",
