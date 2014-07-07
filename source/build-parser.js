@@ -31,7 +31,7 @@ out += 'parse: function(doc, rule){\n'
 out += '_P.doc = doc;\n'
 out += '_P.pos = 0;\n'
 out += 'var res = _rules[rule || "Start"]();\n'
-out += 'return {done: _P.pos == _P.doc.length, success:_P.adv, result:res}\n'
+out += 'return { success:_P.adv, result:res }\n'
 out += '}\n'
 out += '}\n'
 

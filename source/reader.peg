@@ -83,10 +83,11 @@ ExprAtom =
 
 Ref = n:word { ref: n } ;
 Literal = s:str { str: s } ;
-ExprParens = '(' sp e:Expr ')' { e } ;
+ExprParens = '(' sp %anc e:Expr ')' { e } ;
 
 Range =
   '['
+  %anc
   not:'^'? sp
   rs:(
     from:rangechar '-' to:rangechar sp
@@ -99,7 +100,7 @@ Range =
   { range: rs, not: not == '^' }
 ;
 
-rangechar = '\\' any / [^\[\]\ ] ;
+rangechar = '\\' any / [^\[\]\ \^] ;
 
 JSEmbed =
   '{'

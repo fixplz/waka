@@ -306,6 +306,9 @@
               "ref": "sp"
             },
             {
+              "anchor": true
+            },
+            {
               "ref": "Expr",
               "bind": "e"
             },
@@ -324,6 +327,9 @@
           "seq": [
             {
               "str": "["
+            },
+            {
+              "anchor": true
             },
             {
               "opt": {
@@ -408,7 +414,7 @@
           {
             "range": [
               {
-                "oneof": "\\[\\]\\ "
+                "oneof": "\\[\\]\\ \\^"
               }
             ],
             "not": true
