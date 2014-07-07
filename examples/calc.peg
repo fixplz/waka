@@ -1,0 +1,26 @@
+Start =
+  e:SumExpr
+  { calc: e }
+;
+
+SumExpr =
+  left:ProductExpr op:('+' / '-') right:SumExpr
+  { op: op, left: left, right: right }
+/
+  ProductExpr
+;
+
+ProductExpr =
+  left:Number op:('*' / '/') right:ProductExpr
+  { op: op, left: left, right: right }
+/
+  Number
+/
+  '(' e:SumExpr ')'
+  { e }
+;
+
+Number =
+  num:( [0-9]+ ( '.' [0-9]+ )? )
+  { Number(num) }
+;
