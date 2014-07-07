@@ -638,7 +638,7 @@
             "any": {
               "range": [
                 {
-                  "oneof": "{}"
+                  "oneof": "{}\"'"
                 }
               ],
               "not": true
@@ -648,19 +648,30 @@
             "any": {
               "seq": [
                 {
-                  "str": "{"
-                },
-                {
-                  "ref": "embed"
-                },
-                {
-                  "str": "}"
+                  "alt": [
+                    {
+                      "seq": [
+                        {
+                          "str": "{"
+                        },
+                        {
+                          "ref": "embed"
+                        },
+                        {
+                          "str": "}"
+                        }
+                      ]
+                    },
+                    {
+                      "ref": "str"
+                    }
+                  ]
                 },
                 {
                   "any": {
                     "range": [
                       {
-                        "oneof": "{}"
+                        "oneof": "{}\"'"
                       }
                     ],
                     "not": true
