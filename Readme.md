@@ -4,14 +4,18 @@ Create custom document parsers in Javascript.
 
 Use with:
 
-    var Waka = require('./source')
+    var Waka = require('waka')
 
     var parser = Waka.getParser(parserSource)
     var result = parser.parse(input).result
 
+Include `bundle/index.js` to use in the browser.
+
 Read the [intro](/Intro.md) to learn the syntax.
 
 ## Example
+
+This parser converts an arithmetic expression into an AST:
   
     Start =
       e:SumExpr
@@ -40,7 +44,7 @@ Read the [intro](/Intro.md) to learn the syntax.
       { Number(num) }
     ;
 
-----
+Example input and output:
 
     1/2+3*(4-5)
     ===>
