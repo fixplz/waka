@@ -1,0 +1,7 @@
+{
+  "name": "waka",
+  "version": "0.0.1",
+  "devDependencies": {
+    "yargs": "~1.2.6"
+  }
+}
