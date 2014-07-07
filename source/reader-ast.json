@@ -736,12 +736,6 @@
       }
     },
     {
-      "name": "any",
-      "def": {
-        "format": "_P.step(true)"
-      }
-    },
-    {
       "name": "sp",
       "def": {
         "any": {
@@ -775,9 +769,40 @@
                   "str": "\\n"
                 }
               ]
+            },
+            {
+              "seq": [
+                {
+                  "str": "/*"
+                },
+                {
+                  "any": {
+                    "seq": [
+                      {
+                        "lookahead": {
+                          "str": "*/"
+                        },
+                        "not": true
+                      },
+                      {
+                        "ref": "any"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "str": "*/"
+                }
+              ]
             }
           ]
         }
+      }
+    },
+    {
+      "name": "any",
+      "def": {
+        "format": "_P.step(true)"
       }
     }
   ],

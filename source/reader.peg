@@ -135,11 +135,13 @@ slash = '/' sp ;
 semi = ';' sp ;
 col = ':' sp ;
 
-any = { _P.step(true) } ;
-
 sp =
   (
     [\r\n\ ]+
   / '//' [^ \n]* '\n'
+  / '/*' (!'*/' any)* '*/'
   )*
 ;
+
+any = { _P.step(true) } ;
+
