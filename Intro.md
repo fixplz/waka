@@ -69,7 +69,7 @@ Returns something like "aaabbb".
 Returns an array of results because rules might produce values.
 
 
-## Tips
+## More
 
 Here are some useful definitions:
 
@@ -94,6 +94,4 @@ Match a definition
     { tail.length ? [first].concat(tail) : [first] }
 
 Match a list of words seperated by commas
-
-(Use more line breaks in your definitions though!)
 
