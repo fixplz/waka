@@ -402,14 +402,7 @@
       "def": {
         "alt": [
           {
-            "seq": [
-              {
-                "str": "\\\\"
-              },
-              {
-                "ref": "any"
-              }
-            ]
+            "ref": "strEsc"
           },
           {
             "range": [
@@ -547,14 +540,7 @@
                   "any": {
                     "alt": [
                       {
-                        "seq": [
-                          {
-                            "str": "\\\\"
-                          },
-                          {
-                            "ref": "any"
-                          }
-                        ]
+                        "ref": "strEsc"
                       },
                       {
                         "range": [
@@ -595,14 +581,7 @@
                   "any": {
                     "alt": [
                       {
-                        "seq": [
-                          {
-                            "str": "\\\\"
-                          },
-                          {
-                            "ref": "any"
-                          }
-                        ]
+                        "ref": "strEsc"
                       },
                       {
                         "range": [
@@ -628,6 +607,75 @@
             }
           }
         ]
+      }
+    },
+    {
+      "name": "strEsc",
+      "def": {
+        "alt": [
+          {
+            "seq": [
+              {
+                "str": "\\\\u"
+              },
+              {
+                "ref": "hex"
+              },
+              {
+                "ref": "hex"
+              },
+              {
+                "ref": "hex"
+              },
+              {
+                "ref": "hex"
+              }
+            ]
+          },
+          {
+            "seq": [
+              {
+                "str": "\\\\x"
+              },
+              {
+                "ref": "hex"
+              },
+              {
+                "ref": "hex"
+              }
+            ]
+          },
+          {
+            "seq": [
+              {
+                "str": "\\\\"
+              },
+              {
+                "ref": "any"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "hex",
+      "def": {
+        "range": [
+          {
+            "from": "0",
+            "to": "9"
+          },
+          {
+            "from": "a",
+            "to": "f"
+          },
+          {
+            "from": "A",
+            "to": "F"
+          }
+        ],
+        "not": false
       }
     },
     {

@@ -14,9 +14,9 @@ function read(f) {
 }
 
 
-var PEG = require('./source')
+var Waka = require('./')
 
-var parser = PEG.getParser(read(args._[0]))
+var parser = Waka.getParser(read(args._[0]))
 
 console.log(
   util.inspect(parser.parse(args._[1]).result, { depth: null }) )

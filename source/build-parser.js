@@ -68,7 +68,6 @@ function putNode(el, bind) {
   || tryStr()
   || tryRange()
   || tryRef()
-  || tryRange()
   || trySeq()
   || tryAlt()
   || tryAny()

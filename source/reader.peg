@@ -100,7 +100,7 @@ Range =
   { range: rs, not: not == '^' }
 ;
 
-rangechar = '\\' any / [^\[\]\ \^] ;
+rangechar = strEsc / [^\[\]\ \^] ;
 
 JSEmbed =
   '{'
@@ -119,9 +119,15 @@ JSIsObj =
 word = [a-z A-Z _][a-z A-Z 0-9 _]* ;
 
 str = 
-  ["] x:('\\' any / [^"])* ["] { x }
-/ ['] x:('\\' any / [^'])* ['] { x }
+  ["] x:(strEsc / [^"])* ["] { x }
+/ ['] x:(strEsc / [^'])* ['] { x }
 ;
+strEsc =
+  '\\u' hex hex hex hex
+/ '\\x' hex hex
+/ '\\' any
+;
+hex = [0-9 a-f A-F] ;
 
 embed =
   [^{}"']*
