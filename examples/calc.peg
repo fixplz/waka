@@ -1,0 +1,30 @@
+Start =
+  e:SumExpr
+  { calc: e }
+;
+
+SumExpr =
+  expr:ProductExpr
+  ( op:('+' / '-') right:ProductExpr
+    { expr = { op: op, left: expr, right: right } } )*
+  { expr }
+;
+
+ProductExpr =
+  expr:Term
+  ( op:('*' / '/') right:Term
+    { expr = { op: op, left: expr, right: right } } )*
+  { expr }
+;
+
+Term =
+  Number
+/
+  '(' e:SumExpr ')'
+  { e }
+;
+
+Number =
+  num:( [0-9]+ ( '.' [0-9]+ )? )
+  { Number(num) }
+;
