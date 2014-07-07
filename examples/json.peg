@@ -1,4 +1,6 @@
 // Based on https://github.com/dmajda/pegjs/blob/master/examples/json.pegjs
+// Based on the grammar from RFC 7159.
+// http://tools.ietf.org/html/rfc7159
 
 {
   function buildObject(fields) {
@@ -12,9 +14,8 @@
 
 /* ----- 2. JSON Grammar ----- */
 
-Start
-  = ws value:value ws { value }
-;
+Start =
+  ws value:value ws { value } ;
 
 begin_array     = ws "[" ws ;
 begin_object    = ws "{" ws ;
@@ -27,15 +28,14 @@ ws = [\ \t\n\r]* ;
 
 /* ----- 3. Values ----- */
 
-value
-  = false
-  / null
-  / true
-  / object
-  / array
-  / number
-  / string
-;
+value =
+  false
+/ null
+/ true
+/ object
+/ array
+/ number
+/ string ;
 
 false = "false" { false } ;
 null  = "null"  { null  } ;
@@ -43,83 +43,66 @@ true  = "true"  { true  } ;
 
 /* ----- 4. Objects ----- */
 
-object
-  = begin_object
-    %anc
-    members:(
-      first:member
-      rest:(value_separator m:member { m })*
-      { buildObject([first].concat(rest)) }
-    )?
-    end_object
-    { members !== null ? members: {} }
+object =
+  begin_object
+  %anc
+  members:(
+    first:member
+    rest:(value_separator m:member { m })*
+    { buildObject([first].concat(rest)) }
+  )?
+  end_object
+  { members !== null ? members: {} }
 ;
 
-member
-  = name:string name_separator value:value
-    { name: name, value: value }
+member =
+  name:string name_separator value:value
+  { name: name, value: value }
 ;
 
 /* ----- 5. Arrays ----- */
 
-array
-  = begin_array
-    %anc
-    values:(
-      first:value
-      rest:(value_separator v:value { v })*
-      { [first].concat(rest) }
-    )?
-    end_array
-    { values !== null ? values : [] }
+array =
+  begin_array
+  %anc
+  values:(
+    first:value
+    rest:(value_separator v:value { v })*
+    { [first].concat(rest) }
+  )?
+  end_array
+  { values !== null ? values : [] }
 ;
 
 /* ----- 6. Numbers ----- */
 
-number
-  = num:( minus? int frac? exp? ) { parseFloat(num) }
-;
+number = num:( '-'? int frac? exp? ) { parseFloat(num) } ;
 
-decimal_point = "." ;
-digit1_9      = [1-9] ;
-e             = [eE] ;
-exp           = e (minus / plus)? DIGIT+ ;
-frac          = decimal_point DIGIT+ ;
-int           = zero / (digit1_9 DIGIT*) ;
-minus         = "-" ;
-plus          = "+" ;
-zero          = "0" ;
+int  = '0' / ([1-9] [0-9]*) ;
+frac = '.' [0-9]+ ;
+exp  = [eE] ('-' / '+')? [0-9]+ ;
 
 /* ----- 7. Strings ----- */
 
-string
-  = quotation_mark chars:char* quotation_mark { chars.join("") }
+string = '"' chars:char* '"' { chars.join("") } ;
+
+char =
+  [\x20-\x21 \x23-\x5B \x5D-\uFFFF]
+/
+  "\\"
+  sequence:(
+      '"'
+    / "\\"
+    / "/"
+    / "b" { "\b" }
+    / "f" { "\f" }
+    / "n" { "\n" }
+    / "r" { "\r" }
+    / "t" { "\t" }
+    / "u" digits:(hex hex hex hex)
+      { String.fromCharCode(parseInt(digits, 16)) }
+  )
+  { sequence }
 ;
 
-char
-  = unescaped
-  / escape
-    sequence:(
-        '"'
-      / "\\"
-      / "/"
-      / "b" { "\b" }
-      / "f" { "\f" }
-      / "n" { "\n" }
-      / "r" { "\r" }
-      / "t" { "\t" }
-      / "u" digits:(HEXDIG HEXDIG HEXDIG HEXDIG)
-        { String.fromCharCode(parseInt(digits, 16)) }
-    )
-    { sequence }
-;
-
-escape         = "\\" ;
-quotation_mark = '"' ;
-unescaped      = [\x20-\x21 \x23-\x5B \x5D-\uFFFF] ;
-
-/* ----- Core ABNF Rules ----- */
-
-/* See RFC 4234, Appendix B (http://tools.ietf.org/html/rfc4627). */
-DIGIT  = [0-9] ;
-HEXDIG = [0-9 a-f A-F] ;
+hex = [0-9 a-f A-F] ;
