@@ -1,4 +1,6 @@
 
+![](/waka.png)
+
 # Waka
 
 Parser generator for Node and browsers. Compile a DSL to Javascript for execution.
