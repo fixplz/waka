@@ -1,5 +1,7 @@
 exports.buildParser = buildParser
 
+var fs = require('fs')
+
 function buildParser(ast, opts) {
 
 if(opts == null) opts = {}
@@ -7,33 +9,16 @@ if(opts == null) opts = {}
 var ruleState
 
 var out = "'use strict';\n"
-out += "var _P={\n"
-out += "doc:'', pos:0, adv:true,\n"
-out += 'cur: function(){ return _P.doc[_P.pos] },'
-out += "match: function(str) { if(_P.adv = _P.doc.substr(_P.pos, str.length) == str) { _P.pos += str.length; return str } },\n"
-out += "step: function(flag) { if(_P.adv = flag) { _P.pos++; return _P.doc[_P.pos-1] } },\n"
-out += "reset: function(pos) { _P.pos = pos },\n"
-out += "error: function(rule) { console.error('Unexpected syntax in ' + rule); _P.traceline(_P.pos); throw new Error('Cancel parser') },\n"
-out += "traceline: function(pos) { var l = _P.doc.lastIndexOf('\\n', pos), r = _P.doc.indexOf('\\n', pos); if(l == -1) l = 0; else l++; if(r == -1) r = pos.length; console.error('Line', _P.doc.substring(0, l).split('\\n').length); console.error(_P.doc.substring(l, r) + '\\n' + '                                                                                                                        '.substr(0, pos - l) + '^^^') },\n"
-out += "};\n"
-
-out += ast.init + ';\n'
-
 out += 'var _rules={};\n'
+
+if(ast.init)
+  out += ast.init + ';\n'
+
 ast.rules.forEach(function(rule) {
   putRule(rule.name, rule.def)
 })
 
-out += '\n'
-out += 'return {\n'
-out += 'p:_P,\n'
-out += 'parse: function(doc, rule){\n'
-out += '_P.doc = doc;\n'
-out += '_P.pos = 0;\n'
-out += 'var res = _rules[rule || "Start"]();\n'
-out += 'return { success:_P.adv, result:res }\n'
-out += '}\n'
-out += '}\n'
+out += fs.readFileSync(__dirname + '/parser-base.js', 'utf8')
 
 return out
 
