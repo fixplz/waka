@@ -2,11 +2,35 @@ var buildParser = require('./build-parser.js').buildParser
 
 var reader = Function(buildParser(require('./reader-ast.json')))()
 
+module.exports = Waka
 
-exports.getRaw = function(source, opts) {
-  return buildParser(reader.parse(source).result, opts)
+function Waka(peg, opts) {
+  var p = Function(Waka.getSource(peg, opts))()
+
+  return {
+    state: function() {
+      return p._P
+    },
+
+    exec: function(input) {
+      return p.parse(input.toString())
+    },
+
+    rule: function(ruleName) {
+      return {
+        exec: function(input) {
+          return p.parse(input, ruleName)
+        }
+      }
+    },
+  }
 }
 
-exports.getParser = function(source, opts) {
-  return Function(buildParser(reader.parse(source).result, opts))()
+Waka.getAST = function(peg) {
+  var out = reader.parse(peg)
+  return out.result || out
+}
+
+Waka.getSource = function(peg, opts) {
+  return buildParser(Waka.getAST(peg), opts)
 }

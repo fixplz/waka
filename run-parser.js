@@ -9,14 +9,27 @@ var args =
     .demand(2)
     .argv
 
-function read(f) {
-  return fs.readFileSync(f, 'utf8')
+var Waka = require('./')
+
+var parserSource = fs.readFileSync(args._[0], 'utf8')
+
+var inputSource = args._[1]
+
+
+if(inputSource == '-') {
+  var input = ''
+  process.stdin.on('data',
+    function(d) { input += d.toString() })
+  process.stdin.on('end',
+    function() { runParser() })
+}
+else {
+  var input = inputSource
+  runParser()
 }
 
 
-var Waka = require('./')
-
-var parser = Waka.getParser(read(args._[0]))
-
-console.log(
-  util.inspect(parser.parse(args._[1]).result, { depth: null }) )
+function runParser() {
+  var result = Waka(parserSource).exec(input)
+  console.log(util.inspect(result.result, { depth: null }))
+}
