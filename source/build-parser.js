@@ -197,23 +197,39 @@ function tryMany() {
 
   if(!many) return false
 
+  if(many.delim) {
+    if(many.tag == '%sep') {
+      var septoken = many.token
+      many = many.delim
+    }
+    else if(many.tag == '%delim') {
+      many = { seq: [ many.delim, many.token ] }
+    }
+  }
+
   if(bind) {
     var arr = putInitArr(bind)
     var arrItem = putVar(getName())
   }
 
-  if(el.many)
-    var once = putExpr(getName(), 'false')
+  var once = putExpr(getName(), 'false')
 
   out += 'for(;;) {\n'
 
   putNode(many, arrItem)
   out += 'if(!_P.adv) break;\n'
-
+  
   if(bind) out += arr + '.push(' + arrItem + ');\n'
 
+  out += once + '=true;\n'
+
+  if(septoken) {
+    putNode(septoken)
+    out += 'if(!_P.adv) break;\n'
+  }
+
   if(el.many)
-    out += once + '=true; }; if(' + once + ') _P.adv=true;\n'
+    out += '}; if(' + once + ') _P.adv=true;\n'
   else
     out += '}; _P.adv=true;\n'
 
