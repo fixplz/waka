@@ -1,7 +1,6 @@
 {
-  function asSeq(atoms) {
-    if(atoms.length > 1) return { seq: atoms }
-    return atoms[0]
+  function unwrap(val) {
+    if(val.length == 1) return val[0]
   }
   function atom(bind, expr, op) {
     var el =
@@ -11,9 +10,6 @@
       : expr
     if(bind) el.bind = bind
     return el
-  }
-  function cat(arr) {
-    return arr.join('')
   }
 }
 
@@ -37,35 +33,19 @@ Rule =
 RuleHead = n:word sp { n } ;
 
 Expr =
-  left:ExprAction
-  r:(
-    tail:(
-      slash 
-      e:ExprAction {e}
-      )+
-    { alt: [left].concat(tail) }
-  /
-    { left }
-  )
-  { r }
+  alt:( expr:ExprAction %sep slash )+
+  { unwrap(alt) || {alt: alt} }
 ;
 
 ExprAction =
   body:ExprSeq?
-  r:(
-    isobj:JSIsObj
-    format:JSEmbed
-    { format: isobj ? '{' + format.trim() + '}' : format.trim(),
-      of: body }
-  /
-    { body }
-  )
-  { r }
+  format:JSEmbed?
+  { format ? { format: format, of: body } : body }
 ;
 
 ExprSeq =
   atoms:ExprAtom+
-  { asSeq(atoms) }
+  { unwrap(atoms) || {seq: atoms} }
 ;
 
 ExprAtom =
@@ -85,14 +65,11 @@ ExprParens = '(' sp %anc e:InnerExpr ')' { e } ;
 
 InnerExpr =
   expr:Expr
-  r:(
-    tag:('%sep' / '%delim') sp
-    token:Expr
+  ( tag:('%sep' / '%delim') sp token:Expr )?
+  { tag ?
     { delim: expr, tag: tag, token: token }
-  /
-    { expr }
-  )
-  { r }
+    : expr
+  }
 ;
 
 Ref = n:word { ref: n } ;
@@ -103,11 +80,8 @@ Range =
   %anc
   not:'^'? sp
   rs:(
-    from:rangechar '-' to:rangechar sp
-    { from: from, to: to }
-  / 
-    chars:( c:rangechar+ sp { cat(c) } )+
-    { oneof: cat(chars) }
+    from:rangechar '-' to:rangechar sp { from: from, to: to }
+  / chars:( (rangechar+) %delim sp )+ { oneof: chars.join('') }
   )*
   ']'
   { range: rs, not: not == '^' }
@@ -116,17 +90,11 @@ Range =
 rangechar = strEsc / [^\[\]\ \^] ;
 
 JSEmbed =
-  '{'
-  e:embed
+  isobj:( &( '{' sp word ' '* col ) {true} )?
+  '{' sp
+  embed:embed
   '}' sp
-  { e }
-;
-
-JSIsObj =
-  &( '{' sp word ' '* col )
-  { true }
-/
-  { false }
+  { isobj ? '{' + embed + '}' : embed }
 ;
 
 word = [a-z A-Z _][a-z A-Z 0-9 _]* ;

@@ -3,7 +3,7 @@
     {
       "name": "Start",
       "def": {
-        "format": "{rules: rules, init: init,}",
+        "format": "{rules: rules, init: init, }",
         "of": {
           "seq": [
             {
@@ -28,7 +28,7 @@
     {
       "name": "Rule",
       "def": {
-        "format": "{name: name, def: def}",
+        "format": "{name: name, def: def }",
         "of": {
           "seq": [
             {
@@ -55,7 +55,7 @@
     {
       "name": "RuleHead",
       "def": {
-        "format": "n",
+        "format": "n ",
         "of": {
           "seq": [
             {
@@ -72,49 +72,26 @@
     {
       "name": "Expr",
       "def": {
-        "format": "r",
+        "format": "unwrap(alt) || {alt: alt} ",
         "of": {
-          "seq": [
-            {
+          "many": {
+            "delim": {
               "ref": "ExprAction",
-              "bind": "left"
+              "bind": "expr"
             },
-            {
-              "alt": [
-                {
-                  "format": "{alt: [left].concat(tail)}",
-                  "of": {
-                    "many": {
-                      "format": "e",
-                      "of": {
-                        "seq": [
-                          {
-                            "ref": "slash"
-                          },
-                          {
-                            "ref": "ExprAction",
-                            "bind": "e"
-                          }
-                        ]
-                      }
-                    },
-                    "bind": "tail"
-                  }
-                },
-                {
-                  "format": "left"
-                }
-              ],
-              "bind": "r"
+            "tag": "%sep",
+            "token": {
+              "ref": "slash"
             }
-          ]
+          },
+          "bind": "alt"
         }
       }
     },
     {
       "name": "ExprAction",
       "def": {
-        "format": "r",
+        "format": "format ? { format: format, of: body } : body ",
         "of": {
           "seq": [
             {
@@ -124,27 +101,10 @@
               "bind": "body"
             },
             {
-              "alt": [
-                {
-                  "format": "{format: isobj ? '{' + format.trim() + '}' : format.trim(),\n      of: body}",
-                  "of": {
-                    "seq": [
-                      {
-                        "ref": "JSIsObj",
-                        "bind": "isobj"
-                      },
-                      {
-                        "ref": "JSEmbed",
-                        "bind": "format"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "format": "body"
-                }
-              ],
-              "bind": "r"
+              "opt": {
+                "ref": "JSEmbed"
+              },
+              "bind": "format"
             }
           ]
         }
@@ -153,7 +113,7 @@
     {
       "name": "ExprSeq",
       "def": {
-        "format": "asSeq(atoms)",
+        "format": "unwrap(atoms) || {seq: atoms} ",
         "of": {
           "many": {
             "ref": "ExprAtom"
@@ -167,7 +127,7 @@
       "def": {
         "alt": [
           {
-            "format": "atom(bind, expr, op)",
+            "format": "atom(bind, expr, op) ",
             "of": {
               "seq": [
                 {
@@ -222,7 +182,7 @@
             }
           },
           {
-            "format": "{lookahead: expr, not: op == '!'}",
+            "format": "{lookahead: expr, not: op == '!' }",
             "of": {
               "seq": [
                 {
@@ -258,7 +218,7 @@
             }
           },
           {
-            "format": "{anchor: true}",
+            "format": "{anchor: true }",
             "of": {
               "seq": [
                 {
@@ -276,7 +236,7 @@
     {
       "name": "ExprParens",
       "def": {
-        "format": "e",
+        "format": "e ",
         "of": {
           "seq": [
             {
@@ -302,7 +262,7 @@
     {
       "name": "InnerExpr",
       "def": {
-        "format": "r",
+        "format": "tag ?\r\n    { delim: expr, tag: tag, token: token }\r\n    : expr\r\n  ",
         "of": {
           "seq": [
             {
@@ -310,37 +270,28 @@
               "bind": "expr"
             },
             {
-              "alt": [
-                {
-                  "format": "{delim: expr, tag: tag, token: token}",
-                  "of": {
-                    "seq": [
+              "opt": {
+                "seq": [
+                  {
+                    "alt": [
                       {
-                        "alt": [
-                          {
-                            "str": "%sep"
-                          },
-                          {
-                            "str": "%delim"
-                          }
-                        ],
-                        "bind": "tag"
+                        "str": "%sep"
                       },
                       {
-                        "ref": "sp"
-                      },
-                      {
-                        "ref": "Expr",
-                        "bind": "token"
+                        "str": "%delim"
                       }
-                    ]
+                    ],
+                    "bind": "tag"
+                  },
+                  {
+                    "ref": "sp"
+                  },
+                  {
+                    "ref": "Expr",
+                    "bind": "token"
                   }
-                },
-                {
-                  "format": "expr"
-                }
-              ],
-              "bind": "r"
+                ]
+              }
             }
           ]
         }
@@ -349,7 +300,7 @@
     {
       "name": "Ref",
       "def": {
-        "format": "{ref: n}",
+        "format": "{ref: n }",
         "of": {
           "ref": "word",
           "bind": "n"
@@ -359,7 +310,7 @@
     {
       "name": "Literal",
       "def": {
-        "format": "{str: s}",
+        "format": "{str: s }",
         "of": {
           "ref": "str",
           "bind": "s"
@@ -369,7 +320,7 @@
     {
       "name": "Range",
       "def": {
-        "format": "{range: rs, not: not == '^'}",
+        "format": "{range: rs, not: not == '^' }",
         "of": {
           "seq": [
             {
@@ -391,7 +342,7 @@
               "any": {
                 "alt": [
                   {
-                    "format": "{from: from, to: to}",
+                    "format": "{from: from, to: to }",
                     "of": {
                       "seq": [
                         {
@@ -412,22 +363,17 @@
                     }
                   },
                   {
-                    "format": "{oneof: cat(chars)}",
+                    "format": "{oneof: chars.join('') }",
                     "of": {
                       "many": {
-                        "format": "cat(c)",
-                        "of": {
-                          "seq": [
-                            {
-                              "many": {
-                                "ref": "rangechar"
-                              },
-                              "bind": "c"
-                            },
-                            {
-                              "ref": "sp"
-                            }
-                          ]
+                        "delim": {
+                          "many": {
+                            "ref": "rangechar"
+                          }
+                        },
+                        "tag": "%delim",
+                        "token": {
+                          "ref": "sp"
                         }
                       },
                       "bind": "chars"
@@ -465,15 +411,48 @@
     {
       "name": "JSEmbed",
       "def": {
-        "format": "e",
+        "format": "isobj ? '{' + embed + '}' : embed ",
         "of": {
           "seq": [
+            {
+              "opt": {
+                "format": "true",
+                "of": {
+                  "lookahead": {
+                    "seq": [
+                      {
+                        "str": "{"
+                      },
+                      {
+                        "ref": "sp"
+                      },
+                      {
+                        "ref": "word"
+                      },
+                      {
+                        "any": {
+                          "str": " "
+                        }
+                      },
+                      {
+                        "ref": "col"
+                      }
+                    ]
+                  },
+                  "not": false
+                }
+              },
+              "bind": "isobj"
+            },
             {
               "str": "{"
             },
             {
+              "ref": "sp"
+            },
+            {
               "ref": "embed",
-              "bind": "e"
+              "bind": "embed"
             },
             {
               "str": "}"
@@ -483,43 +462,6 @@
             }
           ]
         }
-      }
-    },
-    {
-      "name": "JSIsObj",
-      "def": {
-        "alt": [
-          {
-            "format": "true",
-            "of": {
-              "lookahead": {
-                "seq": [
-                  {
-                    "str": "{"
-                  },
-                  {
-                    "ref": "sp"
-                  },
-                  {
-                    "ref": "word"
-                  },
-                  {
-                    "any": {
-                      "str": " "
-                    }
-                  },
-                  {
-                    "ref": "col"
-                  }
-                ]
-              },
-              "not": false
-            }
-          },
-          {
-            "format": "false"
-          }
-        ]
       }
     },
     {
@@ -572,7 +514,7 @@
       "def": {
         "alt": [
           {
-            "format": "x",
+            "format": "x ",
             "of": {
               "seq": [
                 {
@@ -613,7 +555,7 @@
             }
           },
           {
-            "format": "x",
+            "format": "x ",
             "of": {
               "seq": [
                 {
@@ -897,9 +839,9 @@
     {
       "name": "any",
       "def": {
-        "format": "_P.step(true)"
+        "format": "_P.step(true) "
       }
     }
   ],
-  "init": "\n  function asSeq(atoms) {\n    if(atoms.length > 1) return { seq: atoms }\n    return atoms[0]\n  }\n  function atom(bind, expr, op) {\n    var el =\n      op == '+' ? { many: expr }\n      : op == '*' ? { any: expr }\n      : op == '?' ? { opt: expr }\n      : expr\n    if(bind) el.bind = bind\n    return el\n  }\n  function cat(arr) {\n    return arr.join('')\n  }\n"
+  "init": "function unwrap(val) {\r\n    if(val.length == 1) return val[0]\r\n  }\r\n  function atom(bind, expr, op) {\r\n    var el =\r\n      op == '+' ? { many: expr }\r\n      : op == '*' ? { any: expr }\r\n      : op == '?' ? { opt: expr }\r\n      : expr\r\n    if(bind) el.bind = bind\r\n    return el\r\n  }\r\n"
 }
