@@ -58,7 +58,6 @@ function putNode(el, bind) {
   || tryRef()
   || trySeq()
   || tryAlt()
-  || tryAny()
   || tryMany()
   || tryOpt()
   || tryFormat()
@@ -193,44 +192,30 @@ function tryAlt() {
   return true
 }
 
-function tryAny() {
-  if(!el.any) return false
+function tryMany() {
+  var many = el.many || el.any
+
+  if(!many) return false
 
   if(bind) {
     var arr = putInitArr(bind)
     var arrItem = putVar(getName())
   }
 
-  out += 'for(;;) {\n'
-
-  putNode(el.any, arrItem)
-  out += 'if(!_P.adv) break;\n'
-  
-  if(bind) out += arr + '.push(' + arrItem + ');\n'
-
-  out += '}; _P.adv=true;\n'
-
-  return true
-}
-
-function tryMany() {
-  if(!el.many) return false
-
-  if(bind) {
-    var arr = putInitArr(bind || getName())
-    var arrItem = putVar(getName())
-  }
-  var once = putExpr(getName(), 'false')
+  if(el.many)
+    var once = putExpr(getName(), 'false')
 
   out += 'for(;;) {\n'
 
-  putNode(el.many, arrItem)
+  putNode(many, arrItem)
   out += 'if(!_P.adv) break;\n'
 
   if(bind) out += arr + '.push(' + arrItem + ');\n'
-  out += once + '=true;\n'
 
-  out += '}; if(' + once + ') _P.adv=true;\n'
+  if(el.many)
+    out += once + '=true; }; if(' + once + ') _P.adv=true;\n'
+  else
+    out += '}; _P.adv=true;\n'
 
   return true
 }
