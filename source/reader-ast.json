@@ -274,6 +274,79 @@
       }
     },
     {
+      "name": "ExprParens",
+      "def": {
+        "format": "e",
+        "of": {
+          "seq": [
+            {
+              "str": "("
+            },
+            {
+              "ref": "sp"
+            },
+            {
+              "anchor": true
+            },
+            {
+              "ref": "InnerExpr",
+              "bind": "e"
+            },
+            {
+              "str": ")"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "InnerExpr",
+      "def": {
+        "format": "r",
+        "of": {
+          "seq": [
+            {
+              "ref": "Expr",
+              "bind": "expr"
+            },
+            {
+              "alt": [
+                {
+                  "format": "{delim: expr, tag: tag, token: token}",
+                  "of": {
+                    "seq": [
+                      {
+                        "alt": [
+                          {
+                            "str": "%sep"
+                          },
+                          {
+                            "str": "%delim"
+                          }
+                        ],
+                        "bind": "tag"
+                      },
+                      {
+                        "ref": "sp"
+                      },
+                      {
+                        "ref": "Expr",
+                        "bind": "token"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "format": "expr"
+                }
+              ],
+              "bind": "r"
+            }
+          ]
+        }
+      }
+    },
+    {
       "name": "Ref",
       "def": {
         "format": "{ref: n}",
@@ -290,32 +363,6 @@
         "of": {
           "ref": "str",
           "bind": "s"
-        }
-      }
-    },
-    {
-      "name": "ExprParens",
-      "def": {
-        "format": "e",
-        "of": {
-          "seq": [
-            {
-              "str": "("
-            },
-            {
-              "ref": "sp"
-            },
-            {
-              "anchor": true
-            },
-            {
-              "ref": "Expr",
-              "bind": "e"
-            },
-            {
-              "str": ")"
-            }
-          ]
         }
       }
     },

@@ -81,9 +81,22 @@ ExprAtom =
   '%anc' sp { anchor: true }
 ;
 
+ExprParens = '(' sp %anc e:InnerExpr ')' { e } ;
+
+InnerExpr =
+  expr:Expr
+  r:(
+    tag:('%sep' / '%delim') sp
+    token:Expr
+    { delim: expr, tag: tag, token: token }
+  /
+    { expr }
+  )
+  { r }
+;
+
 Ref = n:word { ref: n } ;
 Literal = s:str { str: s } ;
-ExprParens = '(' sp %anc e:Expr ')' { e } ;
 
 Range =
   '['
