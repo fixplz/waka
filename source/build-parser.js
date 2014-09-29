@@ -7,12 +7,9 @@ function buildParser(ast, opts) {
 if(opts == null) opts = {}
 
 var ruleState
+var out = ''
 
-var out = "'use strict';\n"
-out += 'var _rules={};\n'
-
-if(ast.init)
-  out += ast.init + ';\n'
+putInit()
 
 ast.rules.forEach(function(rule) {
   putRule(rule.name, rule.def)
@@ -22,6 +19,14 @@ out += fs.readFileSync(__dirname + '/parser-base.js', 'utf8')
 
 return out
 
+function putInit() {
+  out += "'use strict';\n"
+  out += 'var _rules={};\n'
+
+  if(ast.init)
+    out += ast.init + ';\n'
+}
+
 function putRule(name, def) {
   ruleState = {
     name: name,
@@ -29,8 +34,6 @@ function putRule(name, def) {
   }
 
   out += '_rules.' + name + ' = function() {\n'
-
-  putExpr('_A', 'false');
 
   putProcIntro()
 
@@ -60,7 +63,6 @@ function putNode(el, bind) {
   || tryOpt()
   || tryFormat()
   || tryLookahead()
-  || tryAnchor()
   )
 
   if(!match) failBuild(el)
@@ -151,8 +153,10 @@ function trySeq() {
   var anchor = null
 
   for(var iter_seq = 0; iter_seq < el.seq.length; iter_seq++) {
-    if(el.seq[iter_seq].anchor)
+    if(el.seq[iter_seq].anchor) {
       anchor = putExpr(getName(), 'true')
+      continue
+    }
 
     putNode(el.seq[iter_seq])
     if(iter_seq < el.seq.length - 1)
@@ -262,14 +266,6 @@ function tryLookahead() {
   out += '_P.pos=' + startPos + ';\n'
   if(el.not)
     out += '_P.adv=!_P.adv;'  
-
-  return true
-}
-
-function tryAnchor() {
-  if(!el.anchor) return false
-
-  out += '_A=true;\n'
 
   return true
 }

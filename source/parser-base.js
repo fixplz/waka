@@ -43,11 +43,14 @@ var _P = {
     if(r == -1)
       r = pos.length
 
-    console.error('Line', _P.doc.substring(0, l).split('\n').length)
+    var lineNo = _P.doc.substring(0, l).split('\n').length
+    var line = _P.doc.substring(l, r)
+    var pointer = Array(200).join(' ').substr(0, pos - l) + '^^^'
 
-    console.error(_P.doc.substring(l, r) + '\n' + Array(200).join(' ').substr(0, pos - l) + '^^^')
+    console.error('Line ' + lineNo + ':')
+    console.error(line)
+    console.error(pointer)
   },
-
 };
 
 return {
