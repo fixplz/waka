@@ -17,6 +17,14 @@ ast.rules.forEach(function(rule) {
 
 out += fs.readFileSync(__dirname + '/parser-base.js', 'utf8')
 
+out +=
+  'var _P = new ParserState\n'
++ 'return {\n'
++ '  state: _P,\n'
++ '  rules: _rules,\n'
++ '}\n'
+
+
 return out
 
 function putInit() {
@@ -40,7 +48,7 @@ function putRule(name, def) {
   putNode(def, '_R')
 
   if(name == 'Start')
-    out += 'if(_P.pos < _P.doc.length) _P.error("top");\n'
+    out += 'if(_P.pos < _P.doc.length) _P.unexpected("top");\n'
 
   putProcOutro()
 
@@ -171,7 +179,7 @@ function trySeq() {
   if(anchor == null)
     out += 'if(!_P.adv) _P.pos=' + startPos + ';\n'
   else
-    out += 'if(!_P.adv && ' + anchor + ') _P.error(' + JSON.stringify(ruleState.name) + ');\n'
+    out += 'if(!_P.adv && ' + anchor + ') _P.unexpected(' + JSON.stringify(ruleState.name) + ');\n'
 
   return true
 }

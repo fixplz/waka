@@ -1,64 +1,59 @@
-var _P = {
+function ParserState() {
+  this.doc = ''
+  this.pos = 0
+  this.adv = true
 
-  doc: '',
-  pos: 0,
-  adv: true,
+  this.setInput = function(doc) {
+    this.doc = doc
+    this.pos = 0
+    this.adv = true
+  }
 
-  cur: function() {
+  this.isEOF = function() {
+    return this.pos == this.doc.length
+  }
+
+  this.cur = function() {
     return _P.doc[_P.pos]
-  },
+  }
 
-  match: function(str) {
+  this.match = function(str) {
     if(_P.adv = _P.doc.substr(_P.pos, str.length) == str) {
       _P.pos += str.length
       return str
     }
-  },
+  }
 
-  step: function(flag) {
+  this.step = function(flag) {
     if(_P.adv = flag) {
       _P.pos++
-      return _P.doc[_P.pos-1]
+      return _P.doc[_P.pos - 1]
     }
-  },
+  }
 
-  reset: function(pos) {
-    _P.pos = pos
-  },
-
-  error: function(rule) {
+  this.unexpected = function(rule) {
     console.error('Unexpected syntax in ' + rule)
-    _P.traceline(_P.pos)
+    _P.traceLine(_P.pos)
     throw new Error('Cancel parser')
-  },
+  }
 
-  traceline: function(pos) {
-    var l = _P.doc.lastIndexOf('\n', pos), r = _P.doc.indexOf('\n', pos)
+  this.traceLine = function(pos) {
+    var from = _P.doc.lastIndexOf('\n', pos), to = _P.doc.indexOf('\n', pos)
     
-    if(l == -1)
-      l = 0
+    if(from == -1)
+      from = 0
     else
-      l++
+      from++
     
-    if(r == -1)
-      r = pos.length
+    if(to == -1)
+      to = pos.length
 
-    var lineNo = _P.doc.substring(0, l).split('\n').length
-    var line = _P.doc.substring(l, r)
-    var pointer = Array(200).join(' ').substr(0, pos - l) + '^^^'
+    var lineNo = _P.doc.substring(0, from).split('\n').length
+    var line = _P.doc.substring(from, to)
+    var pointer = Array(200).join(' ').substr(0, pos - from) + '^^^'
 
     console.error('Line ' + lineNo + ':')
     console.error(line)
     console.error(pointer)
-  },
-};
-
-return {
-  p: _P,
-  parse: function(doc, rule) {
-    _P.doc = doc
-    _P.pos = 0
-    var res = _rules[rule || "Start"]()
-    return { success:_P.adv, result:res }
   }
 }

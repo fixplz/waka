@@ -1,4 +1,4 @@
-#! node
+#!/usr/bin/env node
 
 var fs = require('fs')
 var util = require('util')
@@ -33,14 +33,25 @@ function getReader(ast, dump) {
 function getAST(reader, peg, name, dump) {
   console.log("Running reader on", name)
   
-  var status = reader.parse(peg)
-  
-  console.log(require('util').inspect(status, { depth: 0 }))
+  reader.state.doc = peg
+  reader.state.pos = 0
+  var result = reader.rules.Start()
 
-  if(status.success)
-    write(dump, JSON.stringify(status.result, null, "  "))
+  console.log(require('util').inspect(
+    {
+      state: {
+        pos: reader.state.pos,
+        adv: reader.state.adv,
+        eof: reader.state.isEOF(),
+      },
+      result: result,
+    },
+    { depth: 1 }))
 
-  return status.result
+  if(result)
+    write(dump, JSON.stringify(result, null, "  "))
+
+  return result
 }
 
 function read(f) {
