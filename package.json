@@ -8,9 +8,13 @@
     "examples/"
   ],
   "devDependencies": {
-    "yargs": "~1.2.6",
-    "gulp": "~3.8.5",
-    "gulp-uglify": "~0.3.1",
-    "gulp-browserify": "~0.5.0"
+    "gulp": "^3.8.5",
+    "gulp-browserify": "^0.5.0",
+    "gulp-uglify": "^0.3.1",
+    "tap": "^0.5.0",
+    "yargs": "^1.2.6"
+  },
+  "scripts": {
+    "test": "node test/waka"
   }
 }
