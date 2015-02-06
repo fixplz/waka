@@ -1,6 +1,4 @@
 // Based on https://github.com/dmajda/pegjs/blob/master/examples/json.pegjs
-// Based on the grammar from RFC 7159.
-// http://tools.ietf.org/html/rfc7159
 
 {
   function buildObject(fields) {
@@ -12,21 +10,10 @@
   }
 }
 
-/* ----- 2. JSON Grammar ----- */
-
 Start =
-  ws value:value ws { value } ;
+  sp value:value { value } ;
 
-begin_array     = ws "[" ws ;
-begin_object    = ws "{" ws ;
-end_array       = ws "]" ws ;
-end_object      = ws "}" ws ;
-name_separator  = ws ":" ws ;
-value_separator = ws "," ws ;
-
-ws = [\ \t\n\r]* ;
-
-/* ----- 3. Values ----- */
+sp = [\ \t\n\r]* ;
 
 value =
   false
@@ -37,54 +24,46 @@ value =
 / number
 / string ;
 
-false = "false" { false } ;
-null  = "null"  { null  } ;
-true  = "true"  { true  } ;
-
-/* ----- 4. Objects ----- */
+false = "false" sp { false } ;
+null  = "null" sp  { null } ;
+true  = "true" sp  { true } ;
 
 object =
-  begin_object
+  '{' sp
   %anc
   members:(
     first:member
-    rest:(value_separator m:member { m })*
+    rest:(',' sp m:member { m })*
     { buildObject([first].concat(rest)) }
   )?
-  end_object
+  '}' sp
   { members !== null ? members: {} }
 ;
 
 member =
-  name:string name_separator value:value
+  name:string ':' sp value:value
   { name: name, value: value }
 ;
 
-/* ----- 5. Arrays ----- */
-
 array =
-  begin_array
+  '[' sp
   %anc
   values:(
     first:value
-    rest:(value_separator v:value { v })*
+    rest:(',' sp v:value { v })*
     { [first].concat(rest) }
   )?
-  end_array
+  ']' sp
   { values !== null ? values : [] }
 ;
 
-/* ----- 6. Numbers ----- */
-
-number = num:( '-'? int frac? exp? ) { parseFloat(num) } ;
+number = num:( '-'? int frac? exp? ) sp { parseFloat(num) } ;
 
 int  = '0' / ([1-9] [0-9]*) ;
 frac = '.' [0-9]+ ;
 exp  = [eE] ('-' / '+')? [0-9]+ ;
 
-/* ----- 7. Strings ----- */
-
-string = '"' chars:char* '"' { chars.join("") } ;
+string = '"' chars:char* '"' sp { chars.join("") } ;
 
 char =
   [\x20-\x21 \x23-\x5B \x5D-\uFFFF]
