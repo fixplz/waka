@@ -15,7 +15,7 @@ ast.rules.forEach(function(rule) {
   putRule(rule.name, rule.def)
 })
 
-out += fs.readFileSync(__dirname + '/parser-base.js', 'utf8')
+out += fs.readFileSync(__dirname + '/parser-state.js', 'utf8')
 
 out +=
   'var _P = new ParserState\n'

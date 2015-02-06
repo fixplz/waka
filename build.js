@@ -5,13 +5,13 @@ var util = require('util')
 var args = require('yargs').argv
 
 var fp = {
-  sourceBuilder: './source/build-parser.js',
-  sourceAST: './source/reader-ast.json',
-  sourcePEG: './source/reader.peg',
+  sourceBuilder: './source/compiler.js',
+  sourceAST: './source/parser.peg.json',
+  sourcePEG: './source/parser.peg',
 
   dump: './assemble/stable-builder.dump.js',
   newDump: './assemble/new-builder.dump.js',
-  newAST: './assemble/reader-ast.json',
+  newAST: './assemble/parser.peg.json',
 }
 
 

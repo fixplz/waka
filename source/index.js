@@ -1,6 +1,6 @@
-var buildParser = require('./build-parser.js').buildParser
+var buildParser = require('./compiler').buildParser
 
-var reader = Function(buildParser(require('./reader-ast.json')))()
+var reader = Function(buildParser(require('./parser.peg.json')))()
 
 module.exports = Waka
 
