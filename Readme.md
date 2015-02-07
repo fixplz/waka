@@ -9,15 +9,19 @@ Parser generator for Node and browsers. Compiles PEG programs to Javascript for 
 
     npm install waka
 
-Use with:
+Use it like this:
 
     var Waka = require('waka')
 
     var parser = Waka(peg)
 
     var result = parser.exec(input)
-    if(result.success)
+
+    if(result.error)
+      console.error(parser.getTrace(result.error.message))
+    else
       var value = result.value
+
 
 Read the [intro](/Intro.md) to learn the supported PEG syntax.
 
@@ -37,6 +41,10 @@ Run your parser on an input. Returns an object with these fields:
 ### parser.startWith(rule : String) -> parser
 
 Get a new parser that will begin execution with the given rule, instead of "Start".
+
+### parser.getTrace(message : String) -> String
+
+Get a multiline error message showing the current state of the parser.
 
 ### Waka.getSource(peg : String) -> String
 

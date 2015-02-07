@@ -20,6 +20,10 @@ function Waka(peg, opts) {
         return parser.state
       },
 
+      getTrace: function(message) {
+        return (message ? message + '\n' : '') + parser.state.traceLine()
+      },
+
       exec: function(input) {
         parser.state.setInput(input)
 

@@ -32,12 +32,12 @@ function ParserState() {
   }
 
   this.unexpected = function(rule) {
-    console.error('Unexpected syntax in ' + rule)
-    _P.traceLine(_P.pos)
-    throw new Error('Cancel parser')
+    throw new Error('Unexpected syntax in ' + rule)
   }
 
   this.traceLine = function(pos) {
+    if(! pos) pos = _P.pos
+
     var from = _P.doc.lastIndexOf('\n', pos), to = _P.doc.indexOf('\n', pos)
     
     if(from == -1)
@@ -52,8 +52,10 @@ function ParserState() {
     var line = _P.doc.substring(from, to)
     var pointer = Array(200).join(' ').substr(0, pos - from) + '^^^'
 
-    console.error('Line ' + lineNo + ':')
-    console.error(line)
-    console.error(pointer)
+    return (
+      'Line ' + lineNo + ':\n' +
+      line + '\n' +
+      pointer
+    )
   }
 }

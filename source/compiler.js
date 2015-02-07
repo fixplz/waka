@@ -322,7 +322,7 @@ function stringify(str) {
 
 function failBuild(at) {
   console.error('Invalid parser AST:', at)
-  throw new Error('Canceled parser build')
+  throw new Error('Invalid parser AST')
 }
 
 // end buildParser
