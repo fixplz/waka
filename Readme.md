@@ -3,9 +3,9 @@
 
 # Waka
 
-Parser generator for Node and browsers. Compile a DSL to Javascript for execution.
+Parser generator for Node and browsers. Compiles PEG programs to Javascript for execution.
 
-### Installation
+## Installation
 
     npm install waka
 
@@ -13,31 +13,31 @@ Use with:
 
     var Waka = require('waka')
 
-    var parser = Waka.getParser(parserSource, options)
-    var result = parser.parse(input).result
+    var parser = Waka(peg)
 
-Or include `bundle/index.js` in your page to use in the browser.
+    var result = parser.exec(input)
+    if(result.success)
+      var value = result.value
 
-Read the [intro](/Intro.md) to learn the syntax.
+Read the [intro](/Intro.md) to learn the supported PEG syntax.
 
-### Reference
+## API reference
 
-#### Waka.getParser(source, options) -> parser
+### Waka(peg : String) -> parser
 
-Turn PEG source into JS code end eval it via `Function`.
+Compile your PEG into a runnable parser.
 
-#### Waka.getRaw(source, options) -> string
+### parser.exec(input : String) -> result
 
-Turn PEG source into JS code and return it as a string. It should be wrapped in `(function() { })` before executing.
+Run your parser on an input. Returns an object with these fields:
+- `success : Bool`
+- `error : Error`
+- `value : *` the value returned by your PEG rule
 
-#### options
+### parser.startWith(rule : String) -> parser
 
-* `debug` - if true, generated code will emit `console.log()` traces while parsing.
+Get a new parser that will begin execution with the given rule, instead of "Start".
 
-#### parser
+### Waka.getSource(peg : String) -> String
 
-Object representing an evaluated parser.
-
-#### parser.parse(input) -> { success : bool, result : ? }
-
-Execute the parser.
+Get PEG program compiled as a JS code string. Use this if you want to make your own API.
