@@ -118,3 +118,29 @@ tap.test('errors', function(t) {
 
   t.end()
 })
+
+tap.test('stability', function(t) {
+  var compiler = require('../source/compiler.js')
+
+  function compile(ast) {
+    return compiler.buildParser(ast)
+  }
+
+  var parserOutput = compile(JSON.parse(fs.readFileSync(path.resolve(__dirname, '../source/parser.peg.json'), 'utf8')))
+
+  var parserSource = fs.readFileSync(path.resolve(__dirname, '../source/parser.peg'), 'utf8')
+
+  var iter = 0
+  var parserOriginal = parserOutput
+
+  while(iter < 5) {
+    var parser = Function(parserOutput)()
+    parser.state.doc = parserSource
+    parser.state.pos = 0
+    var parserOutput = compile(parser.rules.Start())
+    t.ok(parserOutput == parserOriginal, "output should stay the same")
+    iter += 1
+  }
+
+  t.end()
+})

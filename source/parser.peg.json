@@ -262,7 +262,7 @@
     {
       "name": "InnerExpr",
       "def": {
-        "format": "tag ?\r\n    { delim: expr, tag: tag, token: token }\r\n    : expr\r\n  ",
+        "format": "tag ?\n    { delim: expr, tag: tag, token: token }\n    : expr\n  ",
         "of": {
           "seq": [
             {
@@ -843,5 +843,5 @@
       }
     }
   ],
-  "init": "function unwrap(val) {\r\n    if(val.length == 1) return val[0]\r\n  }\r\n  function atom(bind, expr, op) {\r\n    var el =\r\n      op == '+' ? { many: expr }\r\n      : op == '*' ? { any: expr }\r\n      : op == '?' ? { opt: expr }\r\n      : expr\r\n    if(bind) el.bind = bind\r\n    return el\r\n  }\r\n"
+  "init": "function unwrap(val) {\n    if(val.length == 1) return val[0]\n  }\n  function atom(bind, expr, op) {\n    var el =\n      op == '+' ? { many: expr }\n      : op == '*' ? { any: expr }\n      : op == '?' ? { opt: expr }\n      : expr\n    if(bind) el.bind = bind\n    return el\n  }\n"
 }
