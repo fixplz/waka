@@ -5,7 +5,6 @@ var path = require('path')
 var Waka = require('../')
 
 tap.test('calc', function(t) {
-  
   var calc = Waka(
     fs.readFileSync(path.resolve(__dirname, '../examples/calc.peg'), 'utf8'))
 
@@ -37,6 +36,10 @@ tap.test('calc', function(t) {
         right: 2 } }
   )
 
+  t.end()
+})
+
+tap.test('json', function(t) {
   var json = Waka(
     fs.readFileSync(path.resolve(__dirname, '../examples/json.peg'), 'utf8'))
 
@@ -48,5 +51,70 @@ tap.test('calc', function(t) {
   )
 
   t.end()
+})
 
+tap.test('errors', function(t) {
+
+  var abc = Waka('Start = a* b* c; a = "a"; b = "b"; c = "c";')
+  var result
+
+  t.deepEqual(
+    result = abc.exec('abc'),
+    { success: true, value: 'abc', error: undefined},
+    "match should have a result")
+
+  t.deepEqual(
+    result = abc.exec('xyz'),
+    { success: false, value: undefined, error: new Error()},
+    "mismatch should have an error")
+
+  t.equal(result.error.message, 'Unexpected syntax in top',
+    "error message should be 'Unexpected syntax in top'")
+  t.equal(abc.getState().pos, 0,
+    "position should be 0")
+
+  var ab = Waka('Start = ab; ab = a:a+ b:b+ {a:a,b:b}; a = "a"; b = "b";')
+
+  t.deepEqual(
+    result = ab.exec('aaaaab'),
+    { success: true, value: {a: ['a','a','a','a','a'], b: ['b']}, error: undefined },
+    "complex PEG should have a result")
+
+  t.deepEqual(
+    result = ab.exec('aaaaabx'),
+    { success: false, value: undefined, error: new Error() },
+    "complex PEG should have an error")
+
+  t.equal(result.error.message, 'Unexpected syntax in top',
+    "error message should be 'Unexpected syntax in top'")
+
+  t.equal(ab.getState().pos, 6,
+    "position should be at mismatch")
+
+  t.equal(ab.getTrace(result.error.message),
+    "Unexpected syntax in top\nLine 1:\naaaaabx\n      ^^^",
+    "location trace should be correct")
+
+  var ab2 = Waka('Start = ab+; ab = %anc a:a+ b:b+ ; a = "a"; b = "b";')
+
+  t.deepEqual(
+    result = ab2.exec('aaaaa'),
+    { success: false, value: undefined, error: new Error() },
+    "complex anchor PEG should have an error")
+
+  t.equal(result.error.message, 'Unexpected syntax in ab',
+    "complex PEG anchor name should appear in error")
+
+  var lines = Waka('Start = (word "\\n")+; word = [a-z]+;')
+
+  t.deepEqual(
+    result = lines.exec('abc\ndef\n!!!\njkl\n'),
+    { success: false, value: undefined, error: new Error() },
+    "multiline PEG should have an error")
+
+  t.equal(lines.getTrace(result.error.message),
+    "Unexpected syntax in top\nLine 3:\n!!!\n^^^",
+    "multiline trace should have correct line")
+
+  t.end()
 })
