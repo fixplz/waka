@@ -6,18 +6,21 @@ module.exports = Waka
 
 function Waka(peg, opts) {
   var parser = Function(Waka.getSource(peg, opts))()
-  return _waka(parser, 'Start')
+  return _waka(parser, (opts && opts.startRule) || 'Start')
 
   function _waka(parser, startRule) {
+    if(! startRule)
+      throw new Error('no start rule given')
+
+    if(! parser.rules[startRule])
+      throw new Error('start rule missing: ' + JSON.stringify(startRule))
+
     return {
       getState: function() {
         return parser.state
       },
 
       exec: function(input) {
-        if(! parser.rules[startRule])
-          throw new Error('start rule missing: ' + JSON.stringify(startRule))
-
         parser.state.setInput(input)
 
         try {
