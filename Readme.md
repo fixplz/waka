@@ -49,3 +49,7 @@ Get a multiline error message showing the current state of the parser.
 ### Waka.getSource(peg : String) -> String
 
 Get PEG program compiled as a JS code string. Use this if you want to make your own API.
+
+### Waka.getSourceStandalone(peg : String) -> String
+
+Get PEG program compiled as a JS code string IIFE containing the same API as `Waka()`.
