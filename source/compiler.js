@@ -47,9 +47,6 @@ function putRule(name, def) {
 
   putNode(def, '_R')
 
-  if(name == 'Start')
-    out += 'if(_P.pos < _P.doc.length) _P.unexpected("top");\n'
-
   putProcOutro()
 
   out += 'return _R;\n'

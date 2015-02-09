@@ -67,7 +67,8 @@ function _waka(parser, startRule) {
 
       if(error == null) {
         if(! parser.state.isEOF())
-          var error = new Error('input not fully parsed')
+          var error = new Error(
+            parser.state.adv ? 'Input not fully parsed' : 'Unexpected syntax in top')
       }
 
       return {
