@@ -173,10 +173,10 @@ function trySeq() {
 
   out += '}\n'
 
-  if(anchor == null)
-    out += 'if(!_P.adv) _P.pos=' + startPos + ';\n'
-  else
+  if(anchor)
     out += 'if(!_P.adv && ' + anchor + ') _P.unexpected(' + JSON.stringify(ruleState.name) + ');\n'
+
+  out += 'if(!_P.adv) _P.pos=' + startPos + ';\n'
 
   return true
 }
