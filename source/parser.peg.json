@@ -3,7 +3,7 @@
     {
       "name": "Start",
       "def": {
-        "format": "{rules: rules, init: init, }",
+        "format": "{rules: rules, init: init,}",
         "of": {
           "seq": [
             {
@@ -11,7 +11,7 @@
             },
             {
               "opt": {
-                "ref": "JSEmbed"
+                "ref": "Embed"
               },
               "bind": "init"
             },
@@ -28,7 +28,7 @@
     {
       "name": "Rule",
       "def": {
-        "format": "{name: name, def: def }",
+        "format": "{name: name, def: def}",
         "of": {
           "seq": [
             {
@@ -55,7 +55,7 @@
     {
       "name": "RuleHead",
       "def": {
-        "format": "n ",
+        "format": "n",
         "of": {
           "seq": [
             {
@@ -72,7 +72,7 @@
     {
       "name": "Expr",
       "def": {
-        "format": "unwrap(alt) || {alt: alt} ",
+        "format": "unwrap(alt) || {alt: alt}",
         "of": {
           "many": {
             "delim": {
@@ -91,7 +91,7 @@
     {
       "name": "ExprAction",
       "def": {
-        "format": "format ? { format: format, of: body } : body ",
+        "format": "format ? { format: format, of: body } : body",
         "of": {
           "seq": [
             {
@@ -102,7 +102,7 @@
             },
             {
               "opt": {
-                "ref": "JSEmbed"
+                "ref": "FormatEmbed"
               },
               "bind": "format"
             }
@@ -113,7 +113,7 @@
     {
       "name": "ExprSeq",
       "def": {
-        "format": "unwrap(atoms) || {seq: atoms} ",
+        "format": "unwrap(atoms) || {seq: atoms}",
         "of": {
           "many": {
             "ref": "ExprAtom"
@@ -127,7 +127,7 @@
       "def": {
         "alt": [
           {
-            "format": "atom(bind, expr, op) ",
+            "format": "atom(bind, expr, op)",
             "of": {
               "seq": [
                 {
@@ -148,20 +148,7 @@
                   "bind": "bind"
                 },
                 {
-                  "alt": [
-                    {
-                      "ref": "Ref"
-                    },
-                    {
-                      "ref": "Range"
-                    },
-                    {
-                      "ref": "Literal"
-                    },
-                    {
-                      "ref": "ExprParens"
-                    }
-                  ],
+                  "ref": "ExprInner",
                   "bind": "expr"
                 },
                 {
@@ -182,7 +169,7 @@
             }
           },
           {
-            "format": "{lookahead: expr, not: op == '!' }",
+            "format": "{lookahead: expr, not: op == '!'}",
             "of": {
               "seq": [
                 {
@@ -195,30 +182,14 @@
                   "bind": "op"
                 },
                 {
-                  "alt": [
-                    {
-                      "ref": "Ref"
-                    },
-                    {
-                      "ref": "Range"
-                    },
-                    {
-                      "ref": "Literal"
-                    },
-                    {
-                      "ref": "ExprParens"
-                    }
-                  ],
+                  "ref": "ExprInner",
                   "bind": "expr"
-                },
-                {
-                  "ref": "sp"
                 }
               ]
             }
           },
           {
-            "format": "{anchor: true }",
+            "format": "{anchor: true}",
             "of": {
               "seq": [
                 {
@@ -229,9 +200,28 @@
                 }
               ]
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ExprInner",
+      "def": {
+        "alt": [
+          {
+            "ref": "Ref"
           },
           {
-            "format": "{special: 'nl' }",
+            "ref": "Range"
+          },
+          {
+            "ref": "Literal"
+          },
+          {
+            "ref": "ExprParens"
+          },
+          {
+            "format": "{special: 'nl'}",
             "of": {
               "seq": [
                 {
@@ -249,7 +239,7 @@
     {
       "name": "ExprParens",
       "def": {
-        "format": "e ",
+        "format": "e",
         "of": {
           "seq": [
             {
@@ -262,20 +252,23 @@
               "anchor": true
             },
             {
-              "ref": "InnerExpr",
+              "ref": "ExprDelim",
               "bind": "e"
             },
             {
               "str": ")"
+            },
+            {
+              "ref": "sp"
             }
           ]
         }
       }
     },
     {
-      "name": "InnerExpr",
+      "name": "ExprDelim",
       "def": {
-        "format": "tag ?\n    { delim: expr, tag: tag, token: token }\n    : expr\n  ",
+        "format": "tag ?\n    { delim: expr, tag: tag, token: token }\n    : expr",
         "of": {
           "seq": [
             {
@@ -313,27 +306,41 @@
     {
       "name": "Ref",
       "def": {
-        "format": "{ref: n }",
+        "format": "{ref: n}",
         "of": {
-          "ref": "word",
-          "bind": "n"
+          "seq": [
+            {
+              "ref": "word",
+              "bind": "n"
+            },
+            {
+              "ref": "sp"
+            }
+          ]
         }
       }
     },
     {
       "name": "Literal",
       "def": {
-        "format": "{str: s }",
+        "format": "{str: s}",
         "of": {
-          "ref": "str",
-          "bind": "s"
+          "seq": [
+            {
+              "ref": "str",
+              "bind": "s"
+            },
+            {
+              "ref": "sp"
+            }
+          ]
         }
       }
     },
     {
       "name": "Range",
       "def": {
-        "format": "{range: rs, not: not == '^' }",
+        "format": "{range: rs, not: not == '^'}",
         "of": {
           "seq": [
             {
@@ -355,7 +362,7 @@
               "any": {
                 "alt": [
                   {
-                    "format": "{from: from, to: to }",
+                    "format": "{from: from, to: to}",
                     "of": {
                       "seq": [
                         {
@@ -376,7 +383,7 @@
                     }
                   },
                   {
-                    "format": "{oneof: chars.join('') }",
+                    "format": "{oneof: chars.join('')}",
                     "of": {
                       "many": {
                         "delim": {
@@ -398,6 +405,9 @@
             },
             {
               "str": "]"
+            },
+            {
+              "ref": "sp"
             }
           ]
         }
@@ -422,9 +432,9 @@
       }
     },
     {
-      "name": "JSEmbed",
+      "name": "FormatEmbed",
       "def": {
-        "format": "isobj ? '{' + embed + '}' : embed ",
+        "format": "isobj ? '{' + embed + '}' : embed",
         "of": {
           "seq": [
             {
@@ -458,10 +468,21 @@
               "bind": "isobj"
             },
             {
-              "str": "{"
-            },
+              "ref": "Embed",
+              "bind": "embed"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Embed",
+      "def": {
+        "format": "embed.trim()",
+        "of": {
+          "seq": [
             {
-              "ref": "sp"
+              "str": "{"
             },
             {
               "ref": "embed",
@@ -527,7 +548,7 @@
       "def": {
         "alt": [
           {
-            "format": "x ",
+            "format": "x",
             "of": {
               "seq": [
                 {
@@ -568,7 +589,7 @@
             }
           },
           {
-            "format": "x ",
+            "format": "x",
             "of": {
               "seq": [
                 {
@@ -861,9 +882,9 @@
     {
       "name": "any",
       "def": {
-        "format": "_P.step(true) "
+        "format": "_P.step(true)"
       }
     }
   ],
-  "init": "function unwrap(val) {\n    if(val.length == 1) return val[0]\n  }\n  function atom(bind, expr, op) {\n    var el =\n      op == '+' ? { many: expr }\n      : op == '*' ? { any: expr }\n      : op == '?' ? { opt: expr }\n      : expr\n    if(bind) el.bind = bind\n    return el\n  }\n"
+  "init": "function unwrap(val) {\n    if(val.length == 1) return val[0]\n  }\n  function atom(bind, expr, op) {\n    var el =\n      op == '+' ? { many: expr }\n      : op == '*' ? { any: expr }\n      : op == '?' ? { opt: expr }\n      : expr\n    if(bind) el.bind = bind\n    return el\n  }"
 }

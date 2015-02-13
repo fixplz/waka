@@ -16,7 +16,7 @@
 
 Start =
   sp
-  init:JSEmbed?
+  init:Embed?
   rules:Rule+
   { rules: rules, init: init, }
 ;
@@ -39,7 +39,7 @@ Expr =
 
 ExprAction =
   body:ExprSeq?
-  format:JSEmbed?
+  format:FormatEmbed?
   { format ? { format: format, of: body } : body }
 ;
 
@@ -50,22 +50,28 @@ ExprSeq =
 
 ExprAtom =
   bind:(n:word col {n})?
-  expr:( Ref / Range / Literal / ExprParens )
+  expr:ExprInner
   op:[?*+]? sp
   { atom(bind, expr, op) }
 / 
   op:[&!]
-  expr:( Ref / Range / Literal / ExprParens ) sp
+  expr:ExprInner
   { lookahead: expr, not: op == '!' }
 /
   '%anc' sp { anchor: true }
-/
-  '%nl' sp { special: 'nl' }
 ;
 
-ExprParens = '(' sp %anc e:InnerExpr ')' { e } ;
+ExprInner =
+  Ref
+/ Range
+/ Literal
+/ ExprParens
+/ '%nl' sp { special: 'nl' }
+;
 
-InnerExpr =
+ExprParens = '(' sp %anc e:ExprDelim ')' sp { e } ;
+
+ExprDelim =
   expr:Expr
   ( tag:('%sep' / '%delim') sp token:Expr )?
   { tag ?
@@ -74,8 +80,8 @@ InnerExpr =
   }
 ;
 
-Ref = n:word { ref: n } ;
-Literal = s:str { str: s } ;
+Ref = n:word sp { ref: n } ;
+Literal = s:str sp { str: s } ;
 
 Range =
   '['
@@ -85,18 +91,21 @@ Range =
     from:rangechar '-' to:rangechar sp { from: from, to: to }
   / chars:( (rangechar+) %delim sp )+ { oneof: chars.join('') }
   )*
-  ']'
+  ']' sp
   { range: rs, not: not == '^' }
 ;
 
 rangechar = strEsc / [^\[\]\ \^\n\r\u2028\u2029] ;
 
-JSEmbed =
+FormatEmbed =
   isobj:( &( '{' sp word ' '* col ) {true} )?
-  '{' sp
-  embed:embed
-  '}' sp
+  embed:Embed
   { isobj ? '{' + embed + '}' : embed }
+;
+
+Embed =
+  '{' embed:embed '}' sp
+  { embed.trim() }
 ;
 
 word = [a-z A-Z _][a-z A-Z 0-9 _]* ;
