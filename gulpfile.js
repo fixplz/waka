@@ -28,6 +28,11 @@ gulp.task('build', function(done) {
   done()
 })
 
+gulp.task('replace', ['build'], function(done) {
+  fs.renameSync('./build/parser.peg.json', './source/parser.peg.json')
+  done()
+})
+
 function compile(ast) {
   var compiler = require('./source/compiler.js')
   var src = compiler.buildParser(ast, { debug: args.debug })
