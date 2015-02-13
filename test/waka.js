@@ -105,7 +105,7 @@ tap.test('errors', function(t) {
   t.equal(result.error.message, 'Unexpected syntax in ab',
     "complex PEG anchor name should appear in error")
 
-  var lines = Waka('Start = (word "\\n")+; word = [a-z]+;')
+  var lines = Waka('Start = (word %nl)+; word = [a-z]+;')
 
   t.deepEqual(
     result = lines.exec('abc\ndef\n!!!\njkl\n'),

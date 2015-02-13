@@ -229,6 +229,19 @@
                 }
               ]
             }
+          },
+          {
+            "format": "{special: 'nl' }",
+            "of": {
+              "seq": [
+                {
+                  "str": "%nl"
+                },
+                {
+                  "ref": "sp"
+                }
+              ]
+            }
           }
         ]
       }
@@ -400,7 +413,7 @@
           {
             "range": [
               {
-                "oneof": "\\[\\]\\ \\^"
+                "oneof": "\\[\\]\\ \\^\\n\\r\\u2028\\u2029"
               }
             ],
             "not": true
@@ -534,7 +547,7 @@
                       {
                         "range": [
                           {
-                            "oneof": "\""
+                            "oneof": "\"\\n\\r\\u2028\\u2029"
                           }
                         ],
                         "not": true
@@ -575,7 +588,7 @@
                       {
                         "range": [
                           {
-                            "oneof": "'"
+                            "oneof": "'\\n\\r\\u2028\\u2029"
                           }
                         ],
                         "not": true
@@ -779,12 +792,14 @@
           "alt": [
             {
               "many": {
-                "range": [
+                "alt": [
                   {
-                    "oneof": "\\r\\n\\ "
+                    "special": "nl"
+                  },
+                  {
+                    "str": " "
                   }
-                ],
-                "not": false
+                ]
               }
             },
             {
@@ -796,14 +811,14 @@
                   "any": {
                     "range": [
                       {
-                        "oneof": "\\n"
+                        "oneof": "\\r\\n"
                       }
                     ],
                     "not": true
                   }
                 },
                 {
-                  "str": "\\n"
+                  "special": "nl"
                 }
               ]
             },
@@ -822,7 +837,14 @@
                         "not": true
                       },
                       {
-                        "ref": "any"
+                        "alt": [
+                          {
+                            "special": "nl"
+                          },
+                          {
+                            "ref": "any"
+                          }
+                        ]
                       }
                     ]
                   }

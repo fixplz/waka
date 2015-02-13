@@ -68,7 +68,8 @@ function putNode(el, bind) {
     el.any || el.many ? putMany() :
     el.opt ?            putOpt() :
     el.format ?         putFormat() :
-    el.lookahead ?      putLookahead()
+    el.lookahead ?      putLookahead() :
+    el.special ?        putSpecial()
     : abortCompile(el)
   )
 
@@ -138,7 +139,9 @@ function putSeq() {
   out += block + ':{'
 
   var startPos = getName()
+  var startLine = getName()
   putExpr(startPos, '_P.pos')
+  putExpr(startLine, '_P.line')
   var anchor = null
 
   for(var iter_seq = 0; iter_seq < el.seq.length; iter_seq++) {
@@ -161,7 +164,7 @@ function putSeq() {
   if(anchor)
     out += 'if(!_P.adv && ' + anchor + ') _P.unexpected(' + JSON.stringify(ruleState.name) + ');\n'
 
-  out += 'if(!_P.adv) _P.pos=' + startPos + ';\n'
+  out += 'if(!_P.adv) { _P.pos=' + startPos + '; _P.line=' + startLine + '; }\n'
 }
 
 function putAlt() {
@@ -237,6 +240,15 @@ function putLookahead() {
   out += '_P.pos=' + startPos + ';\n'
   if(el.not)
     out += '_P.adv=!_P.adv;'  
+}
+
+function putSpecial() {
+  if(el.special == 'nl') {
+    putNode({seq: [{opt: {str: '\\r'}}, {str: '\\n'}]})
+    out += 'if(_P.adv){ _P.line++; }\n'
+  }
+  else
+    abortCompile(el)
 }
 
 }

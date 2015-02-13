@@ -59,6 +59,8 @@ ExprAtom =
   { lookahead: expr, not: op == '!' }
 /
   '%anc' sp { anchor: true }
+/
+  '%nl' sp { special: 'nl' }
 ;
 
 ExprParens = '(' sp %anc e:InnerExpr ')' { e } ;
@@ -124,9 +126,9 @@ col = ':' sp ;
 
 sp =
   (
-    [\r\n\ ]+
-  / '//' [^ \n]* '\n'
-  / '/*' (!'*/' any)* '*/'
+    (%nl / ' ')+
+  / '//' [^ \r\n]* %nl
+  / '/*' (!'*/' (%nl / any))* '*/'
   )*
 ;
 

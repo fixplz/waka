@@ -1,11 +1,13 @@
 function ParserState() {
   this.doc = ''
   this.pos = 0
+  this.line = 1
   this.adv = true
 
   this.setInput = function(doc) {
     this.doc = doc
     this.pos = 0
+    this.line = 1
     this.adv = true
   }
 
@@ -63,12 +65,11 @@ function ParserState() {
     if(to == -1)
       to = pos.length
 
-    var lineNo = _P.doc.substring(0, from).split('\n').length
     var line = _P.doc.substring(from, to)
     var pointer = Array(200).join(' ').substr(0, pos - from) + '^^^'
 
     return (
-      'Line ' + lineNo + ':\n' +
+      'Line ' + _P.line + ':\n' +
       line + '\n' +
       pointer
     )
