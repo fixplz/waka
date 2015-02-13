@@ -57,22 +57,20 @@ function putRule(name, def) {
 function putNode(el, bind) {
   bind = bind || el.bind
 
-  var match = (
-     tryRewrites()
-  || tryStr()
-  || tryRange()
-  || tryRef()
-  || trySeq()
-  || tryAlt()
-  || tryMany()
-  || tryOpt()
-  || tryFormat()
-  || tryLookahead()
+  if(tryRewrites()) return
+
+  return (
+    el.str ?            putStr() :
+    el.range ?          putRange() :
+    el.ref ?            putRef() :
+    el.seq ?            putSeq() :
+    el.alt ?            putAlt() :
+    el.any || el.many ? putMany() :
+    el.opt ?            putOpt() :
+    el.format ?         putFormat() :
+    el.lookahead ?      putLookahead()
+    : abortCompile(el)
   )
-
-  if(!match) failBuild(el)
-
-  return
 
 function tryRewrites() {
   if(el.any && bind && isSimple(el.any)) {
@@ -95,17 +93,11 @@ function isSimple(el) {
   return false
 }
 
-function tryStr() {
-  if(!el.str) return false
-
+function putStr() {
   putExpr(bind, '_P.match(' + stringify(el.str) + ')' )
-  
-  return true
 }
 
-function tryRange() {
-  if(!el.range) return false
-
+function putRange() {
   var curChar = getName()
   putExpr(curChar, '_P.cur()')
   out += 'if(' + curChar + '==null){'
@@ -134,21 +126,13 @@ function tryRange() {
   out += ');\n'
 
   out += '}\n'
-
-  return true
 }
 
-function tryRef() {
-  if(!el.ref) return false
-
+function putRef() {
   putExpr(bind, '_rules.' + el.ref + '()' )
-
-  return true
 }
 
-function trySeq() {
-  if(!el.seq) return false
-
+function putSeq() {
   var block = getName()
 
   out += block + ':{'
@@ -178,13 +162,9 @@ function trySeq() {
     out += 'if(!_P.adv && ' + anchor + ') _P.unexpected(' + JSON.stringify(ruleState.name) + ');\n'
 
   out += 'if(!_P.adv) _P.pos=' + startPos + ';\n'
-
-  return true
 }
 
-function tryAlt() {
-  if(!el.alt) return false
-  
+function putAlt() {
   for(var iter_alt = 0; iter_alt < el.alt.length; iter_alt++) {
     if(iter_alt > 0)
       out += 'if(!_P.adv){ _P.adv=true;\n'
@@ -194,14 +174,10 @@ function tryAlt() {
     if(iter_alt > 0)
       out += '}\n'
   }
-  
-  return true
 }
 
-function tryMany() {
+function putMany() {
   var many = el.many || el.any
-
-  if(!many) return false
 
   if(many.delim) {
     if(many.tag == '%sep') {
@@ -238,34 +214,22 @@ function tryMany() {
     out += '}; if(' + once + ') _P.adv=true;\n'
   else
     out += '}; _P.adv=true;\n'
-
-  return true
 }
 
-function tryOpt() {
-  if(!el.opt) return false
-
+function putOpt() {
   putExpr(bind, 'null')
   putNode(el.opt, bind)
   out += '_P.adv=true;\n'
-  
-  return true
 }
 
-function tryFormat() {
-  if(!el.format) return false
-
+function putFormat() {
   if(el.of)
     putNode(el.of)
   out += 'if(_P.adv)'
   putExpr(bind, '(' + el.format + ')')
-
-  return true
 }
 
-function tryLookahead() {
-  if(!el.lookahead) return false
-
+function putLookahead() {
   var startPos = putExpr(getName(), '_P.pos')
 
   putNode(el.lookahead, bind)
@@ -273,8 +237,6 @@ function tryLookahead() {
   out += '_P.pos=' + startPos + ';\n'
   if(el.not)
     out += '_P.adv=!_P.adv;'  
-
-  return true
 }
 
 }
@@ -325,7 +287,7 @@ function stringify(str) {
   return '"' + str.replace(/(")/g, '\\$1') + '"'
 }
 
-function failBuild(at) {
+function abortCompile(at) {
   console.error('Invalid parser AST:', at)
   throw new Error('Invalid parser AST')
 }
