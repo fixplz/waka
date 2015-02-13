@@ -87,7 +87,7 @@ Range =
   { range: rs, not: not == '^' }
 ;
 
-rangechar = strEsc / [^\[\]\ \^] ;
+rangechar = strEsc / [^\[\]\ \^\n\r\u2028\u2029] ;
 
 JSEmbed =
   isobj:( &( '{' sp word ' '* col ) {true} )?
@@ -99,9 +99,9 @@ JSEmbed =
 
 word = [a-z A-Z _][a-z A-Z 0-9 _]* ;
 
-str = 
-  ["] x:(strEsc / [^"])* ["] { x }
-/ ['] x:(strEsc / [^'])* ['] { x }
+str =
+  ["] x:(strEsc / [^"\n\r\u2028\u2029])* ["] { x }
+/ ['] x:(strEsc / [^'\n\r\u2028\u2029])* ['] { x }
 ;
 strEsc =
   '\\u' hex hex hex hex
