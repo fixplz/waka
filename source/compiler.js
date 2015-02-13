@@ -9,6 +9,7 @@ if(opts == null) opts = {}
 var ruleState
 var out = ''
 
+putDebug()
 putInit()
 
 ast.rules.forEach(function(rule) {
@@ -278,15 +279,22 @@ function tryLookahead() {
 
 }
 
+function putDebug() {
+  if(opts.debug) {
+    out += 'var _traceIndent = "";\n'
+    out += 'function traceIn(rule) { _P.log((_traceIndent + ">" + rule + "                              ").slice(0,30), _P.tracePos(_P.pos)); _traceIndent += " " }\n';
+    out += 'function traceOut(rule) { _P.log(((_traceIndent = _traceIndent.slice(1)) + "<" + rule + "                              ").slice(0,30), _P.adv ? _P.tracePos(_P.pos) : "X") }\n';
+  }
+}
 
 function putProcIntro() {
-  if(opts.debug)
-    out += 'console.log(">' + ruleState.name + '", _P.pos);\n'
+  if(opts.debug && ruleState.name[0] == ruleState.name[0].toUpperCase())
+    out += 'traceIn(' + JSON.stringify(ruleState.name) + ');\n'
 }
 
 function putProcOutro(name) {
-  if(opts.debug)
-    out += 'console.log("<' + ruleState.name + '", _P.adv ? _P.pos : "X");\n'
+  if(opts.debug && ruleState.name[0] == ruleState.name[0].toUpperCase())
+    out += 'traceOut(' + JSON.stringify(ruleState.name) + ');\n'
 }
 
 function putBindStart(bind) {
