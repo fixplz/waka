@@ -130,10 +130,10 @@ strEsc =
 hex = [0-9 a-f A-F] ;
 
 embed =
-  [^{}()"']*
+  [^{}()"'\r\n]*
   (
-    ( '{' embed '}' / '(' embed ')' / str )
-    [^{}()"']*
+    ( '{' embed '}' / '(' embed ')' / str / %nl )
+    [^{}()"'\r\n]*
   )* ;
 
 eq = '=' sp ;
