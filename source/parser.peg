@@ -33,35 +33,35 @@ Rule =
 RuleHead = n:word sp { n } ;
 
 Expr =
-  alt:( expr:ExprAction %sep slash )+
+  alt:( expr:ExprBlock %sep slash )+
   { unwrap(alt) || {alt: alt} }
 ;
 
-ExprAction =
+ExprBlock =
   body:ExprSeq?
   format:FormatEmbed?
   { format ? { format: format, of: body } : body }
 ;
 
 ExprSeq =
-  atoms:ExprAtom+
+  atoms:ExprStep+
   { unwrap(atoms) || {seq: atoms} }
 ;
 
-ExprAtom =
+ExprStep =
   bind:(n:word col {n})?
-  expr:ExprInner
+  expr:ExprVal
   op:[?*+]? sp
   { atom(bind, expr, op) }
 / 
   op:[&!]
-  expr:ExprInner
+  expr:ExprVal
   { lookahead: expr, not: op == '!' }
 /
   '%anc' sp { anchor: true }
 ;
 
-ExprInner =
+ExprVal =
   Ref
 / Range
 / Literal
@@ -69,15 +69,15 @@ ExprInner =
 / '%nl' sp { special: 'nl' }
 ;
 
-ExprParens = '(' sp %anc e:ExprDelim ')' sp { e } ;
-
-ExprDelim =
+ExprParens =
+  '(' sp
+  %anc
   expr:Expr
   ( tag:('%sep' / '%delim') sp token:Expr )?
+  ')' sp
   { tag ?
     { delim: expr, tag: tag, token: token }
-    : expr
-  }
+    : expr }
 ;
 
 Ref = n:word sp { ref: n } ;

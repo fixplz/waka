@@ -76,7 +76,7 @@
         "of": {
           "many": {
             "delim": {
-              "ref": "ExprAction",
+              "ref": "ExprBlock",
               "bind": "expr"
             },
             "tag": "%sep",
@@ -89,7 +89,7 @@
       }
     },
     {
-      "name": "ExprAction",
+      "name": "ExprBlock",
       "def": {
         "format": "format ? { format: format, of: body } : body",
         "of": {
@@ -116,14 +116,14 @@
         "format": "unwrap(atoms) || {seq: atoms}",
         "of": {
           "many": {
-            "ref": "ExprAtom"
+            "ref": "ExprStep"
           },
           "bind": "atoms"
         }
       }
     },
     {
-      "name": "ExprAtom",
+      "name": "ExprStep",
       "def": {
         "alt": [
           {
@@ -148,7 +148,7 @@
                   "bind": "bind"
                 },
                 {
-                  "ref": "ExprInner",
+                  "ref": "ExprVal",
                   "bind": "expr"
                 },
                 {
@@ -182,7 +182,7 @@
                   "bind": "op"
                 },
                 {
-                  "ref": "ExprInner",
+                  "ref": "ExprVal",
                   "bind": "expr"
                 }
               ]
@@ -205,7 +205,7 @@
       }
     },
     {
-      "name": "ExprInner",
+      "name": "ExprVal",
       "def": {
         "alt": [
           {
@@ -239,7 +239,7 @@
     {
       "name": "ExprParens",
       "def": {
-        "format": "e",
+        "format": "tag ?\n    { delim: expr, tag: tag, token: token }\n    : expr",
         "of": {
           "seq": [
             {
@@ -251,26 +251,6 @@
             {
               "anchor": true
             },
-            {
-              "ref": "ExprDelim",
-              "bind": "e"
-            },
-            {
-              "str": ")"
-            },
-            {
-              "ref": "sp"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "ExprDelim",
-      "def": {
-        "format": "tag ?\n    { delim: expr, tag: tag, token: token }\n    : expr",
-        "of": {
-          "seq": [
             {
               "ref": "Expr",
               "bind": "expr"
@@ -298,6 +278,12 @@
                   }
                 ]
               }
+            },
+            {
+              "str": ")"
+            },
+            {
+              "ref": "sp"
             }
           ]
         }
