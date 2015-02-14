@@ -247,8 +247,8 @@ function putLookahead() {
 
 function putSpecial() {
   if(el.special == 'nl') {
-    putNode({seq: [{opt: {str: '\\r'}}, {str: '\\n'}]})
-    out += 'if(_P.adv){ _P.line++; }\n'
+    out += '_P.match("\\r"); _P.match("\\n");\n'
+    out += 'if(_P.adv) _P.line++;\n'
   }
   else if(el.special == 'any') {
     putBindStart(bind)
