@@ -67,6 +67,8 @@ ExprVal =
 / Literal
 / ExprParens
 / '%nl' sp { special: 'nl' }
+/ '%any' { special: 'any'}
+/ '%match' embed:EmbedParens { special: { match: embed } }
 / '%' embed:Embed { special: { embed: embed } }
 ;
 
@@ -109,6 +111,11 @@ Embed =
   { embed.trim() }
 ;
 
+EmbedParens =
+  '(' embed:embed ')' sp
+  { embed.trim() }
+;
+
 word = [a-z A-Z _][a-z A-Z 0-9 _]* ;
 
 str =
@@ -118,15 +125,15 @@ str =
 strEsc =
   '\\u' hex hex hex hex
 / '\\x' hex hex
-/ '\\' any
+/ '\\' %any
 ;
 hex = [0-9 a-f A-F] ;
 
 embed =
-  [^{}"']*
+  [^{}()"']*
   (
-    ( '{' embed '}' / str )
-    [^{}"']*
+    ( '{' embed '}' / '(' embed ')' / str )
+    [^{}()"']*
   )* ;
 
 eq = '=' sp ;
@@ -138,9 +145,8 @@ sp =
   (
     (%nl / ' ')+
   / '//' [^ \r\n]* %nl
-  / '/*' (!'*/' (%nl / any))* '*/'
+  / '/*' (!'*/' (%nl / %any))* '*/'
   )*
 ;
 
-any = { _P.step(true) } ;
 

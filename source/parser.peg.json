@@ -242,6 +242,26 @@
             }
           },
           {
+            "format": "{special: 'any'}",
+            "of": {
+              "str": "%any"
+            }
+          },
+          {
+            "format": "{special: { match: embed }}",
+            "of": {
+              "seq": [
+                {
+                  "str": "%match"
+                },
+                {
+                  "ref": "EmbedParens",
+                  "bind": "embed"
+                }
+              ]
+            }
+          },
+          {
             "format": "{special: { embed: embed }}",
             "of": {
               "seq": [
@@ -507,6 +527,29 @@
       }
     },
     {
+      "name": "EmbedParens",
+      "def": {
+        "format": "embed.trim()",
+        "of": {
+          "seq": [
+            {
+              "str": "("
+            },
+            {
+              "ref": "embed",
+              "bind": "embed"
+            },
+            {
+              "str": ")"
+            },
+            {
+              "ref": "sp"
+            }
+          ]
+        }
+      }
+    },
+    {
       "name": "word",
       "def": {
         "seq": [
@@ -682,7 +725,7 @@
                 "str": "\\\\"
               },
               {
-                "ref": "any"
+                "special": "any"
               }
             ]
           }
@@ -717,7 +760,7 @@
             "any": {
               "range": [
                 {
-                  "oneof": "{}\"'"
+                  "oneof": "{}()\"'"
                 }
               ],
               "not": true
@@ -742,6 +785,19 @@
                       ]
                     },
                     {
+                      "seq": [
+                        {
+                          "str": "("
+                        },
+                        {
+                          "ref": "embed"
+                        },
+                        {
+                          "str": ")"
+                        }
+                      ]
+                    },
+                    {
                       "ref": "str"
                     }
                   ]
@@ -750,7 +806,7 @@
                   "any": {
                     "range": [
                       {
-                        "oneof": "{}\"'"
+                        "oneof": "{}()\"'"
                       }
                     ],
                     "not": true
@@ -871,7 +927,7 @@
                             "special": "nl"
                           },
                           {
-                            "ref": "any"
+                            "special": "any"
                           }
                         ]
                       }
@@ -885,12 +941,6 @@
             }
           ]
         }
-      }
-    },
-    {
-      "name": "any",
-      "def": {
-        "format": "_P.step(true)"
       }
     }
   ],

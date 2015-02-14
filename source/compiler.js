@@ -250,9 +250,17 @@ function putSpecial() {
     putNode({seq: [{opt: {str: '\\r'}}, {str: '\\n'}]})
     out += 'if(_P.adv){ _P.line++; }\n'
   }
+  else if(el.special == 'any') {
+    putBindStart(bind)
+    out +='_P.step(true);\n'
+  }
   else if(el.special.embed) {
     putBindStart(bind)
     out += '(' + el.special.embed + ');\n'
+  }
+  else if(el.special.match) {
+    putBindStart(bind)
+    out += '_P.match(' + el.special.match + ');\n'
   }
   else
     abortCompile(el)
