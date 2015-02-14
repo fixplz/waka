@@ -22,15 +22,20 @@ Start =
 ;
 
 Rule =
-  name:RuleHead
+  name:word sp
+  params:RuleParams?
   eq
   %anc
   def:Expr
   semi
-  { name: name, def: def }
+  { name: name, params: params, def: def }
 ;
 
-RuleHead = n:word sp { n } ;
+RuleParams =
+  '%(' sp %anc
+  params:(p:word sp {p} %sep ',' sp)+
+  ')' sp
+  {params};
 
 Expr =
   alt:( expr:ExprBlock %sep slash )+
@@ -81,7 +86,8 @@ ExprParens =
   { ! sep ? expr : { delim: expr, sep: sep } }
 ;
 
-Ref = n:word sp { ref: n } ;
+Ref = name:word ('%' params:EmbedParens)? sp { ref: name, params: params } ;
+
 Literal = s:str sp { str: s } ;
 
 Range =

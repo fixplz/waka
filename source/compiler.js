@@ -13,7 +13,7 @@ putDebug()
 putInit()
 
 ast.rules.forEach(function(rule) {
-  putRule(rule.name, rule.def)
+  putRule(rule)
 })
 
 out += fs.readFileSync(__dirname + '/parser-state.js', 'utf8')
@@ -36,17 +36,17 @@ function putInit() {
     out += ast.init + ';\n'
 }
 
-function putRule(name, def) {
+function putRule(rule) {
   ruleState = {
-    name: name,
+    name: rule.name,
     vars: 0,
   }
 
-  out += '_rules.' + name + ' = function() {\n'
+  out += '_rules.' + rule.name + ' = function(' + (rule.params || '') + ') {\n'
 
   putProcIntro()
 
-  putNode(def, '_R')
+  putNode(rule.def, '_R')
 
   putProcOutro()
 
@@ -130,7 +130,7 @@ function putRange() {
 }
 
 function putRef() {
-  putExpr(bind, '_rules.' + el.ref + '()' )
+  putExpr(bind, '_rules.' + el.ref + (el.params ? '(' + el.params + ')' : '()'))
 }
 
 function putSeq() {

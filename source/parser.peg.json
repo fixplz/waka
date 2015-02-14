@@ -28,12 +28,21 @@
     {
       "name": "Rule",
       "def": {
-        "format": "{name: name, def: def}",
+        "format": "{name: name, params: params, def: def}",
         "of": {
           "seq": [
             {
-              "ref": "RuleHead",
+              "ref": "word",
               "bind": "name"
+            },
+            {
+              "ref": "sp"
+            },
+            {
+              "opt": {
+                "ref": "RuleParams"
+              },
+              "bind": "params"
             },
             {
               "ref": "eq"
@@ -53,14 +62,51 @@
       }
     },
     {
-      "name": "RuleHead",
+      "name": "RuleParams",
       "def": {
-        "format": "n",
+        "format": "params",
         "of": {
           "seq": [
             {
-              "ref": "word",
-              "bind": "n"
+              "str": "%("
+            },
+            {
+              "ref": "sp"
+            },
+            {
+              "anchor": true
+            },
+            {
+              "many": {
+                "delim": {
+                  "format": "p",
+                  "of": {
+                    "seq": [
+                      {
+                        "ref": "word",
+                        "bind": "p"
+                      },
+                      {
+                        "ref": "sp"
+                      }
+                    ]
+                  }
+                },
+                "sep": {
+                  "seq": [
+                    {
+                      "str": ","
+                    },
+                    {
+                      "ref": "sp"
+                    }
+                  ]
+                }
+              },
+              "bind": "params"
+            },
+            {
+              "str": ")"
             },
             {
               "ref": "sp"
@@ -325,12 +371,25 @@
     {
       "name": "Ref",
       "def": {
-        "format": "{ref: n}",
+        "format": "{ref: name, params: params}",
         "of": {
           "seq": [
             {
               "ref": "word",
-              "bind": "n"
+              "bind": "name"
+            },
+            {
+              "opt": {
+                "seq": [
+                  {
+                    "str": "%"
+                  },
+                  {
+                    "ref": "EmbedParens",
+                    "bind": "params"
+                  }
+                ]
+              }
             },
             {
               "ref": "sp"
