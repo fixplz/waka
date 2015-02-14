@@ -235,7 +235,10 @@ function putFormat() {
 function putLookahead() {
   var startPos = putExpr(getName(), '_P.pos')
 
-  putNode(el.lookahead, bind)
+  if(el.embed)
+    out += '_P.adv=(' + el.embed + ');\n'
+  else
+    putNode(el.lookahead, bind);
 
   out += '_P.pos=' + startPos + ';\n'
   if(el.not)
@@ -246,6 +249,10 @@ function putSpecial() {
   if(el.special == 'nl') {
     putNode({seq: [{opt: {str: '\\r'}}, {str: '\\n'}]})
     out += 'if(_P.adv){ _P.line++; }\n'
+  }
+  else if(el.special.embed) {
+    putBindStart(bind)
+    out += '(' + el.special.embed + ');\n'
   }
   else
     abortCompile(el)

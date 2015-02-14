@@ -55,8 +55,8 @@ ExprStep =
   { atom(bind, expr, op) }
 / 
   op:[&!]
-  expr:ExprVal
-  { lookahead: expr, not: op == '!' }
+  (expr:ExprVal / embed:Embed)
+  { lookahead: expr || true, not: op == '!', embed: embed }
 /
   '%anc' sp { anchor: true }
 ;
@@ -67,6 +67,7 @@ ExprVal =
 / Literal
 / ExprParens
 / '%nl' sp { special: 'nl' }
+/ '%' embed:Embed { special: { embed: embed } }
 ;
 
 ExprParens =

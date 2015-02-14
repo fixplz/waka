@@ -169,7 +169,7 @@
             }
           },
           {
-            "format": "{lookahead: expr, not: op == '!'}",
+            "format": "{lookahead: expr || true, not: op == '!', embed: embed}",
             "of": {
               "seq": [
                 {
@@ -182,8 +182,16 @@
                   "bind": "op"
                 },
                 {
-                  "ref": "ExprVal",
-                  "bind": "expr"
+                  "alt": [
+                    {
+                      "ref": "ExprVal",
+                      "bind": "expr"
+                    },
+                    {
+                      "ref": "Embed",
+                      "bind": "embed"
+                    }
+                  ]
                 }
               ]
             }
@@ -229,6 +237,20 @@
                 },
                 {
                   "ref": "sp"
+                }
+              ]
+            }
+          },
+          {
+            "format": "{special: { embed: embed }}",
+            "of": {
+              "seq": [
+                {
+                  "str": "%"
+                },
+                {
+                  "ref": "Embed",
+                  "bind": "embed"
                 }
               ]
             }
