@@ -183,12 +183,9 @@ function putMany() {
   var many = el.many || el.any
 
   if(many.delim) {
-    if(many.tag == '%sep') {
-      var septoken = many.token
+    if(many.sep) {
+      var septoken = many.sep
       many = many.delim
-    }
-    else if(many.tag == '%delim') {
-      many = { seq: [ many.delim, many.token ] }
     }
   }
 
@@ -201,6 +198,18 @@ function putMany() {
 
   out += 'for(;;) {\n'
 
+  var startPos = getName()
+  var startLine = getName()
+  putExpr(startPos, '_P.pos')
+  putExpr(startLine, '_P.line')
+
+  if(septoken) {
+    out += 'if(' + once + ') {'
+    putNode(septoken)
+    out += '}'
+    out += 'if(!_P.adv) break;\n'
+  }
+
   putNode(many, arrItem)
   out += 'if(!_P.adv) break;\n'
   
@@ -208,15 +217,13 @@ function putMany() {
 
   out += once + '=true;\n'
 
-  if(septoken) {
-    putNode(septoken)
-    out += 'if(!_P.adv) break;\n'
-  }
+  out += '}\n'
+  out += 'if(!_P.adv) { _P.pos=' + startPos + '; _P.line=' + startLine + '; }\n'
 
   if(el.many)
-    out += '}; if(' + once + ') _P.adv=true;\n'
+    out += 'if(' + once + ') _P.adv=true;\n'
   else
-    out += '}; _P.adv=true;\n'
+    out += '_P.adv=true;\n'
 }
 
 function putOpt() {

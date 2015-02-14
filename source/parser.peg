@@ -76,11 +76,9 @@ ExprParens =
   '(' sp
   %anc
   expr:Expr
-  ( tag:('%sep' / '%delim') sp token:Expr )?
+  ( '%sep' sp sep:Expr )?
   ')' sp
-  { tag ?
-    { delim: expr, tag: tag, token: token }
-    : expr }
+  { ! sep ? expr : { delim: expr, sep: sep } }
 ;
 
 Ref = n:word sp { ref: n } ;
@@ -92,7 +90,7 @@ Range =
   not:'^'? sp
   rs:(
     from:rangechar '-' to:rangechar sp { from: from, to: to }
-  / chars:( (rangechar+) %delim sp )+ { oneof: chars.join('') }
+  / chars:( r:(rangechar+) sp {r.join('')} )+ { oneof: chars.join('') }
   )*
   ']' sp
   { range: rs, not: not == '^' }

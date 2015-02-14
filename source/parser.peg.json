@@ -79,8 +79,7 @@
               "ref": "ExprBlock",
               "bind": "expr"
             },
-            "tag": "%sep",
-            "token": {
+            "sep": {
               "ref": "slash"
             }
           },
@@ -281,7 +280,7 @@
     {
       "name": "ExprParens",
       "def": {
-        "format": "tag ?\n    { delim: expr, tag: tag, token: token }\n    : expr",
+        "format": "! sep ? expr : { delim: expr, sep: sep }",
         "of": {
           "seq": [
             {
@@ -301,22 +300,14 @@
               "opt": {
                 "seq": [
                   {
-                    "alt": [
-                      {
-                        "str": "%sep"
-                      },
-                      {
-                        "str": "%delim"
-                      }
-                    ],
-                    "bind": "tag"
+                    "str": "%sep"
                   },
                   {
                     "ref": "sp"
                   },
                   {
                     "ref": "Expr",
-                    "bind": "token"
+                    "bind": "sep"
                   }
                 ]
               }
@@ -414,14 +405,19 @@
                     "format": "{oneof: chars.join('')}",
                     "of": {
                       "many": {
-                        "delim": {
-                          "many": {
-                            "ref": "rangechar"
-                          }
-                        },
-                        "tag": "%delim",
-                        "token": {
-                          "ref": "sp"
+                        "format": "r.join('')",
+                        "of": {
+                          "seq": [
+                            {
+                              "many": {
+                                "ref": "rangechar"
+                              },
+                              "bind": "r"
+                            },
+                            {
+                              "ref": "sp"
+                            }
+                          ]
                         }
                       },
                       "bind": "chars"
