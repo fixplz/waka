@@ -39,6 +39,8 @@ Waka.getSourceStandalone = function(peg, opts) {
   )
 }
 
+Waka.wrapper = _waka
+
 function _waka(parser, startRule) {
   if(startRule && ! parser.rules[startRule])
     throw new Error('start rule missing: ' + JSON.stringify(startRule))

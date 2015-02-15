@@ -42,13 +42,16 @@ function ParserState() {
   }
 
   this.tracePos = function(pos) {
+    if(! pos) pos = _P.pos
+
     function esc(str) {
       return str && JSON.stringify(str).slice(1,-1)
     }
+
     return (
       esc(_P.doc.slice(Math.max(0, pos - 6), pos)) +
       '[' + (pos == _P.doc.length ? 'eof' : esc(_P.doc[pos])) + ']' +
-      esc(_P.doc.slice(pos + 1, pos + 12))
+      esc(_P.doc.slice(pos + 1, pos + 20))
     )
   }
 

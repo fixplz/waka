@@ -43,20 +43,17 @@ function compile(ast) {
 function runParser(reader, peg) {
   console.log("Running parser")
 
-  reader.state.doc = peg
-  reader.state.pos = 0
-  var result = reader.rules.Start()
+  var parser = require('./').wrapper(reader, 'Start')
 
-  console.log('state =', {
-    pos: reader.state.pos,
-    adv: reader.state.adv,
-    eof: reader.state.isEOF(),
-  })
+  var result = parser.exec(peg)
 
-  console.log('result =', result)
+  console.log('done')
+  console.log(reader.state.tracePos())
+  console.log('error =', result.error)
+  console.log('result =', result.value)
 
-  if(result)
-    saveBuild('parser.peg.json', JSON.stringify(result, null, "  "))
+  if(result.value)
+    saveBuild('parser.peg.json', JSON.stringify(result.value, null, "  "))
 
   return result
 }
