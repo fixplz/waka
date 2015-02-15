@@ -106,7 +106,7 @@ function putRange() {
   putExpr(bind, 'null')
   out += '}else{\n'
 
-  putBindStart(bind)
+  putVarStart(bind)
 
   out += '_P.step('
   if(el.not)
@@ -138,10 +138,9 @@ function putSeq() {
 
   out += block + ':{'
 
-  var startPos = getName()
-  var startLine = getName()
-  putExpr(startPos, '_P.pos')
-  putExpr(startLine, '_P.line')
+  var startPos = putExpr(getName(), '_P.pos')
+  var startLine = putExpr(getName(), '_P.line')
+
   var anchor = null
 
   for(var iter_seq = 0; iter_seq < el.seq.length; iter_seq++) {
@@ -190,7 +189,7 @@ function putMany() {
   }
 
   if(bind) {
-    var arr = putInitArr(bind)
+    var arr = putExpr(bind, '[]')
     var arrItem = putVar(getName())
   }
 
@@ -198,10 +197,8 @@ function putMany() {
 
   out += 'for(;;) {\n'
 
-  var startPos = getName()
-  var startLine = getName()
-  putExpr(startPos, '_P.pos')
-  putExpr(startLine, '_P.line')
+  var startPos = putExpr(getName(), '_P.pos')
+  var startLine = putExpr(getName(), '_P.line')
 
   if(septoken) {
     out += 'if(' + once + ') {'
@@ -258,16 +255,13 @@ function putSpecial() {
     out += 'if(_P.adv) _P.line++;\n'
   }
   else if(el.special == 'any') {
-    putBindStart(bind)
-    out +='_P.step(true);\n'
+    putExpr(bind, '_P.step(true)')
   }
   else if(el.special.embed) {
-    putBindStart(bind)
-    out += '(' + el.special.embed + ');\n'
+    putExpr(bind, '(' + el.special.embed + ')')
   }
   else if(el.special.match) {
-    putBindStart(bind)
-    out += '_P.match(' + el.special.match + ');\n'
+    putExpr(bind, '_P.match(' + el.special.match + ')')
   }
   else
     abortCompile(el)
@@ -293,10 +287,6 @@ function putProcOutro(name) {
     out += 'traceOut(' + JSON.stringify(ruleState.name) + ');\n'
 }
 
-function putBindStart(bind) {
-  if(bind) out += 'var ' + bind + '='
-}
-
 function putExpr(bind, expr) {
   if(bind) out += 'var ' + bind + '='
   out += expr + ';\n'
@@ -308,8 +298,8 @@ function putVar(name) {
   return name
 }
 
-function putInitArr(name) {
-  out += 'var ' + name + ' = [];\n'
+function putVarStart(name) {
+  if(name) out += 'var ' + name + '='
   return name
 }
 
