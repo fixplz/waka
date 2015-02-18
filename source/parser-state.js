@@ -58,7 +58,7 @@ function ParserState() {
   this.traceLine = function(pos) {
     if(! pos) pos = _P.pos
 
-    var from = _P.doc.lastIndexOf('\n', pos), to = _P.doc.indexOf('\n', pos)
+    var from = _P.doc.lastIndexOf('\n', pos - 1), to = _P.doc.indexOf('\n', pos)
     
     if(from == -1)
       from = 0
