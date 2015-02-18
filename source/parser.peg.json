@@ -140,9 +140,7 @@
         "of": {
           "seq": [
             {
-              "opt": {
-                "ref": "ExprSeq"
-              },
+              "ref": "ExprSeq",
               "bind": "body"
             },
             {

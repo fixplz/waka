@@ -43,7 +43,7 @@ Expr =
 ;
 
 ExprBlock =
-  body:ExprSeq?
+  body:ExprSeq
   format:FormatEmbed?
   { format ? { format: format, of: body } : body }
 ;
